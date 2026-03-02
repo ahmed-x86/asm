@@ -35,8 +35,6 @@ echo "Step 2: Detecting Linux Distribution..."
 if [ -f /etc/os-release ]; then
     . /etc/os-release
     DISTRO=$ID
-    # دمج المعرفات المشابهة لسهولة الفحص
-    OS_FAMILY=$ID_LIKE
 else
     DISTRO="unknown"
 fi
@@ -61,19 +59,23 @@ case $DISTRO in
         ;;
     *gentoo*)
         echo "Detected Gentoo Linux. Installing via emerge..."
-        echo "Note: This may take time as it compiles from source."
         sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex
+        ;;
+    *solus*)
+        echo "Detected Solus. Installing via eopkg..."
+        sudo eopkg install nasm mingw-w64 wine binutils ghex
         ;;
     *)
         echo "Could not auto-detect distribution ($DISTRO)."
-        echo "A) Arch | D) Debian | F) Fedora | V) Void | G) Gentoo"
-        read -p "Please select your base (A/D/F/V/G): " choice
+        echo "A) Arch | D) Debian | F) Fedora | V) Void | G) Gentoo | S) Solus"
+        read -p "Please select your base (A/D/F/V/G/S): " choice
         case $choice in
             [Aa]* ) sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex ;;
             [Dd]* ) sudo apt update && sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex ;;
             [Ff]* ) sudo dnf install -y nasm mingw64-gcc wine binutils ghex ;;
             [Vv]* ) sudo xbps-install -S nasm cross-x86_64-w64-mingw32-gcc wine binutils ghex ;;
             [Gg]* ) sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex ;;
+            [Ss]* ) sudo eopkg install nasm mingw-w64 wine binutils ghex ;;
         esac
         ;;
 esac
