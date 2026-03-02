@@ -1,1 +1,1 @@
-nasm minGW-w64 wine objdump ghex
+nasm mingw-w64-gcc wine binutils ghex
