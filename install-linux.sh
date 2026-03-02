@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# إنشاء مجلد الإعدادات إذا لم يكن موجوداً
+
 mkdir -p .vscode
 
-# تعريف قائمة الملفات المطلوبة
+
 files=("c_cpp_properties.json" "launch.json" "settings.json" "tasks.json")
 LOCAL_DIR="install-linux"
 
 echo "Checking for local configurations..."
 
-# التحقق من وجود المجلد المحلي للنسخ أو التحميل
+
 if [ -d "$LOCAL_DIR" ]; then
     echo "Found local directory: $LOCAL_DIR. Copying files..."
     for file in "${files[@]}"; do
