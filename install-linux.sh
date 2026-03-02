@@ -34,51 +34,89 @@ echo "Step 2: Detecting Linux Distribution..."
 
 if [ -f /etc/os-release ]; then
     . /etc/os-release
-    DISTRO=$ID
+    
+    OS_ID=$ID
+    OS_LIKE=$ID_LIKE
 else
-    DISTRO="unknown"
+    OS_ID="unknown"
 fi
 
-case $DISTRO in
-    *arch* | *manjaro* | *endeavouros* | *cachyos*)
-        echo "Detected Arch-based system ($DISTRO). Installing via pacman..."
-        sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex
-        ;;
-    *debian* | *ubuntu* | *mint* | *zorin*)
-        echo "Detected Debian/Ubuntu-based system ($DISTRO). Installing via apt..."
-        sudo apt update
-        sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex
-        ;;
-    *fedora* | *rhel* | *centos* | *nobara*)
-        echo "Detected Fedora-based system ($DISTRO). Installing via dnf..."
-        sudo dnf install -y nasm mingw64-gcc wine binutils ghex
-        ;;
-    *void*)
-        echo "Detected Void Linux. Installing via xbps..."
-        sudo xbps-install -S nasm cross-x86_64-w64-mingw32-gcc wine binutils ghex
-        ;;
-    *gentoo*)
-        echo "Detected Gentoo Linux. Installing via emerge..."
-        sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex
-        ;;
-    *solus*)
-        echo "Detected Solus. Installing via eopkg..."
-        sudo eopkg install nasm mingw-w64 wine binutils ghex
-        ;;
-    *)
-        echo "Could not auto-detect distribution ($DISTRO)."
-        echo "A) Arch | D) Debian | F) Fedora | V) Void | G) Gentoo | S) Solus"
-        read -p "Please select your base (A/D/F/V/G/S): " choice
-        case $choice in
-            [Aa]* ) sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex ;;
-            [Dd]* ) sudo apt update && sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex ;;
-            [Ff]* ) sudo dnf install -y nasm mingw64-gcc wine binutils ghex ;;
-            [Vv]* ) sudo xbps-install -S nasm cross-x86_64-w64-mingw32-gcc wine binutils ghex ;;
-            [Gg]* ) sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex ;;
-            [Ss]* ) sudo eopkg install nasm mingw-w64 wine binutils ghex ;;
-        esac
-        ;;
-esac
+
+install_packages() {
+    case $1 in
+        arch)
+            echo "Installing for Arch-based system..."
+            sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex
+            ;;
+        debian)
+            echo "Installing for Debian/Ubuntu-based system..."
+            sudo apt update && sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex
+            ;;
+        fedora)
+            echo "Installing for Fedora-based system (Bazzit/Nobara)..."
+            sudo dnf install -y nasm mingw64-gcc wine binutils ghex
+            ;;
+        void)
+            echo "Installing for Void Linux..."
+            sudo xbps-install -S nasm cross-x86_64-w64-mingw32-gcc wine binutils ghex
+            ;;
+        gentoo)
+            echo "Installing for Gentoo..."
+            sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex
+            ;;
+        solus)
+            echo "Installing for Solus..."
+            sudo eopkg install nasm mingw-w64 wine binutils ghex
+            ;;
+        suse)
+            echo "Installing for openSUSE..."
+            sudo zypper install -y nasm mingw64-gcc wine binutils ghex
+            ;;
+        alpine)
+            echo "Installing for Alpine Linux..."
+            sudo apk add nasm mingw-w64-gcc wine binutils ghex
+            ;;
+        puppy)
+            echo "Installing for Puppy Linux (using pkg)..."
+            pkg install nasm mingw-w64-gcc wine binutils ghex
+            ;;
+    esac
+}
+
+
+if [[ "$OS_ID" =~ (arch|manjaro|endeavouros|cachyos) ]] || [[ "$OS_LIKE" == *"arch"* ]]; then
+    install_packages arch
+elif [[ "$OS_ID" =~ (debian|ubuntu|mint|zorin|peppermint|kali|parrot) ]] || [[ "$OS_LIKE" == *"debian"* ]]; then
+    install_packages debian
+elif [[ "$OS_ID" =~ (fedora|nobara|bazzit|rhel|centos) ]] || [[ "$OS_LIKE" == *"fedora"* ]]; then
+    install_packages fedora
+elif [[ "$OS_ID" == "void" ]]; then
+    install_packages void
+elif [[ "$OS_ID" == "gentoo" ]]; then
+    install_packages gentoo
+elif [[ "$OS_ID" == "solus" ]]; then
+    install_packages solus
+elif [[ "$OS_ID" =~ (suse|opensuse) ]]; then
+    install_packages suse
+elif [[ "$OS_ID" == "alpine" ]]; then
+    install_packages alpine
+elif [[ "$OS_ID" == "pappoos" ]] || [[ "$OS_NAME" == *"Puppy"* ]]; then
+    install_packages puppy
+else
+    echo "Could not auto-detect distribution ($OS_ID)."
+    echo "1) Arch  2) Debian  3) Fedora  4) Void  5) Gentoo  6) Solus  7) openSUSE  8) Alpine"
+    read -p "Select your base (1-8): " choice
+    case $choice in
+        1) install_packages arch ;;
+        2) install_packages debian ;;
+        3) install_packages fedora ;;
+        4) install_packages void ;;
+        5) install_packages gentoo ;;
+        6) install_packages solus ;;
+        7) install_packages suse ;;
+        8) install_packages alpine ;;
+    esac
+fi
 
 echo "------------------------------------------"
 echo "Setup finished successfully! Happy Hacking."
