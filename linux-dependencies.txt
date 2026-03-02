@@ -1,1 +1,0 @@
-nasm mingw-w64-gcc wine binutils ghex
