@@ -14,6 +14,11 @@ Assembly Development Environment 🚀
 ![Gentoo](https://img.shields.io/badge/Gentoo-54487A?style=for-the-badge&logo=gentoo&logoColor=white)
 ![Void Linux](https://img.shields.io/badge/Void_Linux-47841F?style=for-the-badge&logo=void-linux&logoColor=white)
 ![VS Code](https://img.shields.io/badge/VS_Code-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+![Bazzit](https://img.shields.io/badge/Bazzit-525865?style=for-the-badge&logo=fedora&logoColor=white)
+![Peppermint](https://img.shields.io/badge/Peppermint_OS-E11221?style=for-the-badge&logo=peppermint&logoColor=white)
+![Puppy Linux](https://img.shields.io/badge/Puppy_Linux-B22222?style=for-the-badge&logo=linux&logoColor=white)
+![openSUSE](https://img.shields.io/badge/openSUSE-73BA48?style=for-the-badge&logo=opensuse&logoColor=white)
+![Alpine Linux](https://img.shields.io/badge/Alpine_Linux-0D597F?style=for-the-badge&logo=alpine-linux&logoColor=white)
 
 An all-in-one repository designed to kickstart your Assembly (ASM) development on Linux. This environment provides out-of-the-box support for Linux x64 and Windows (32/64-bit) targets, featuring pre-configured VS Code settings for a seamless workflow.
 🛠️ Installation
