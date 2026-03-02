@@ -1,14 +1,13 @@
 #!/bin/bash
 
 
-mkdir -p .vscode
 
+mkdir -p .vscode
 
 files=("c_cpp_properties.json" "launch.json" "settings.json" "tasks.json")
 LOCAL_DIR="install-linux"
 
-echo "Checking for local configurations..."
-
+echo "Step 1: Checking for local configurations..."
 
 if [ -d "$LOCAL_DIR" ]; then
     echo "Found local directory: $LOCAL_DIR. Copying files..."
@@ -21,10 +20,11 @@ if [ -d "$LOCAL_DIR" ]; then
         fi
     done
 else
-    echo "Local directory not found. Starting download..."
+    echo "Local directory not found. Starting download from GitHub..."
     for file in "${files[@]}"; do
         URL="https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-linux/$file"
         curl -fsSL "$URL" -o ".vscode/$file"
+        echo "Downloaded $file"
     done
 fi
 
@@ -32,31 +32,46 @@ echo "------------------------------------------"
 echo "VS Code configuration complete!"
 echo "------------------------------------------"
 
+# 2. التعرف التلقائي على التوزيعة
+echo "Step 2: Detecting Linux Distribution..."
 
-echo "Which Linux distribution are you using?"
-echo "A) Arch based"
-echo "D) Debian/Ubuntu based"
-echo "F) Fedora based"
-read -p "Please enter your choice (A/D/F): " choice
+if [ -f /etc/os-release ]; then
+    
+    . /etc/os-release
+    DISTRO=$ID
+    
+    DISTRO_LIKE=$ID_LIKE
+else
+    DISTRO="unknown"
+fi
 
-case $choice in
-    [Aa]* )
-        echo "Installing dependencies for Arch Linux..."
-        
+
+case $DISTRO in
+    *arch* | *manjaro* | *endeavouros*)
+        echo "Detected Arch-based system ($DISTRO). Installing via pacman..."
         sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex
         ;;
-    [Dd]* )
-        echo "Installing dependencies for Debian/Ubuntu..."
+    *debian* | *ubuntu* | *mint*)
+        echo "Detected Debian/Ubuntu-based system ($DISTRO). Installing via apt..."
         sudo apt update
         sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex
         ;;
-    [Ff]* )
-        echo "Installing dependencies for Fedora..."
+    *fedora* | *rhel* | *centos*)
+        echo "Detected Fedora-based system ($DISTRO). Installing via dnf..."
         sudo dnf install -y nasm mingw64-gcc wine binutils ghex
         ;;
-    * )
-        echo "Invalid choice. Skipping dependency installation."
+    *)
+        
+        echo "Could not auto-detect distribution ($DISTRO)."
+        echo "A) Arch | D) Debian | F) Fedora"
+        read -p "Please select your base (A/D/F): " choice
+        case $choice in
+            [Aa]* ) sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex ;;
+            [Dd]* ) sudo apt update && sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex ;;
+            [Ff]* ) sudo dnf install -y nasm mingw64-gcc wine binutils ghex ;;
+        esac
         ;;
 esac
 
-echo "Setup finished successfully!"
+echo "------------------------------------------"
+echo "Setup finished successfully! Happy Hacking."
