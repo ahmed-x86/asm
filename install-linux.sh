@@ -1,7 +1,5 @@
 #!/bin/bash
 
-
-
 mkdir -p .vscode
 
 files=("c_cpp_properties.json" "launch.json" "settings.json" "tasks.json")
@@ -32,43 +30,50 @@ echo "------------------------------------------"
 echo "VS Code configuration complete!"
 echo "------------------------------------------"
 
-# 2. التعرف التلقائي على التوزيعة
 echo "Step 2: Detecting Linux Distribution..."
 
 if [ -f /etc/os-release ]; then
-    
     . /etc/os-release
     DISTRO=$ID
-    
-    DISTRO_LIKE=$ID_LIKE
+    # دمج المعرفات المشابهة لسهولة الفحص
+    OS_FAMILY=$ID_LIKE
 else
     DISTRO="unknown"
 fi
 
-
 case $DISTRO in
-    *arch* | *manjaro* | *endeavouros*)
+    *arch* | *manjaro* | *endeavouros* | *cachyos*)
         echo "Detected Arch-based system ($DISTRO). Installing via pacman..."
         sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex
         ;;
-    *debian* | *ubuntu* | *mint*)
+    *debian* | *ubuntu* | *mint* | *zorin*)
         echo "Detected Debian/Ubuntu-based system ($DISTRO). Installing via apt..."
         sudo apt update
         sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex
         ;;
-    *fedora* | *rhel* | *centos*)
+    *fedora* | *rhel* | *centos* | *nobara*)
         echo "Detected Fedora-based system ($DISTRO). Installing via dnf..."
         sudo dnf install -y nasm mingw64-gcc wine binutils ghex
         ;;
+    *void*)
+        echo "Detected Void Linux. Installing via xbps..."
+        sudo xbps-install -S nasm cross-x86_64-w64-mingw32-gcc wine binutils ghex
+        ;;
+    *gentoo*)
+        echo "Detected Gentoo Linux. Installing via emerge..."
+        echo "Note: This may take time as it compiles from source."
+        sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex
+        ;;
     *)
-        
         echo "Could not auto-detect distribution ($DISTRO)."
-        echo "A) Arch | D) Debian | F) Fedora"
-        read -p "Please select your base (A/D/F): " choice
+        echo "A) Arch | D) Debian | F) Fedora | V) Void | G) Gentoo"
+        read -p "Please select your base (A/D/F/V/G): " choice
         case $choice in
             [Aa]* ) sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex ;;
             [Dd]* ) sudo apt update && sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex ;;
             [Ff]* ) sudo dnf install -y nasm mingw64-gcc wine binutils ghex ;;
+            [Vv]* ) sudo xbps-install -S nasm cross-x86_64-w64-mingw32-gcc wine binutils ghex ;;
+            [Gg]* ) sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex ;;
         esac
         ;;
 esac
