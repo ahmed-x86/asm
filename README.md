@@ -1,4 +1,4 @@
-Assembly Development Environment 🚀
+# Assembly Development Environment 🚀
 
 ![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?style=for-the-badge&logo=arch-linux&logoColor=white)
 ![Manjaro](https://img.shields.io/badge/Manjaro-35BF5C?style=for-the-badge&logo=manjaro&logoColor=white)
@@ -24,14 +24,14 @@ An all-in-one repository designed to kickstart your Assembly (ASM) development o
 🛠️ Installation
 
 You can set up your environment using one of the two following methods:
-1. One-Line Installer (Online)
+## 1. One-Line Installer (Online)
 
 Use this command to configure your current directory immediately without cloning the entire repo:
-Bash
+
 ```
 bash <(curl -sSL https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-linux.sh)
 ```
-2. Local Setup (Manual)
+## 2. Local Setup (Manual)
 
 If you have already cloned the repository or prefer a manual installation:
 Bash
@@ -41,7 +41,7 @@ cp -r asm/. .
 chmod +x install-linux.sh
 ./install-linux.sh
 ```
-✨ Key Features
+## ✨ Key Features
 
 Smart Distro Detection: Automatically detects and installs dependencies for Arch Linux, Debian/Ubuntu, and Fedora.
 
@@ -51,10 +51,12 @@ Cross-Platform Support: Ready-to-use toolchains (NASM, MinGW-w64, Wine) to compi
 
 Optimized for Arch: Because "I use Arch btw" shouldn't mean spending three hours on config. 😎
 
-💡 Improvements Made:
+## 💡 Improvements Made:
 
 Terminology: Changed "Direct Installation" to "One-Line Installer," which is more common in DevOps circles.
 
 Clarity: Specified that the VS Code integration handles both building and debugging.
 
 Tone: Kept the "Arch Linux" humor but refined the technical descriptions to sound more authoritative.
+
+---
