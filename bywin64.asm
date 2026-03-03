@@ -3,7 +3,7 @@
 ; Link: x86_64-w64-mingw32-gcc bywindows64.obj -o bywindows64.exe -nostartfiles -lkernel32
 
 section .data
-    msg db 'hi i use arch 64-bit btw', 10, 0
+    msg db 'hi i use arch btw by win64', 10, 0
     msg_len equ $-msg
 
 section .bss

@@ -1,5 +1,5 @@
 section .data
-msg db 'i use Archlinux BTW',0Ah
+msg db 'i use Archlinux BTW from linux64',0Ah
 len equ $ - msg
 
 section .text
