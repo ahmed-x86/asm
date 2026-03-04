@@ -41,7 +41,7 @@ else
     OS_ID="unknown"
 fi
 
-)
+
 install_uasm_manual() {
     if command -v uasm &> /dev/null; then
         echo "uasm is already installed."
