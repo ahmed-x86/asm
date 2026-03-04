@@ -119,4 +119,25 @@ else
 fi
 
 echo "------------------------------------------"
+
+echo "Step 3: Updating launch.json paths to match current directory..."
+
+
+CURRENT_DIR=$(pwd)
+LAUNCH_FILE=".vscode/launch.json"
+
+
+if [ -f "$LAUNCH_FILE" ]; then
+    
+    sed -i "s|\"cwd\": \"/mnt/data/github_repos/asm\"|\"cwd\": \"$CURRENT_DIR\"|g" "$LAUNCH_FILE"
+    
+    
+    sed -i "s|\"program\": \"/mnt/data/github_repos/asm/build/Debug/outDebug\"|\"program\": \"$CURRENT_DIR/build/Debug/outDebug\"|g" "$LAUNCH_FILE"
+    
+    echo "Successfully updated paths in $LAUNCH_FILE to $CURRENT_DIR"
+else
+    echo "Warning: $LAUNCH_FILE not found. Skipping path update."
+fi
+
+echo "------------------------------------------"
 echo "Setup finished successfully! Happy Hacking."
