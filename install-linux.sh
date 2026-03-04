@@ -41,48 +41,53 @@ else
     OS_ID="unknown"
 fi
 
-
 install_packages() {
     case $1 in
         arch)
             echo "Installing for Arch-based system..."
-            sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex
+            sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex unzip
+            
+            echo "Installing uasm via yay..."
+            if command -v yay &> /dev/null; then
+                yay -S --needed --noconfirm uasm
+            else
+                echo "Warning: 'yay' is not installed. Please install 'uasm' manually."
+            fi
             ;;
         debian)
             echo "Installing for Debian/Ubuntu-based system..."
-            sudo apt update && sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex
+            sudo apt update && sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex unzip
             ;;
         fedora)
             echo "Installing for Fedora-based system (Bazzit/Nobara)..."
-            sudo dnf install -y nasm mingw64-gcc wine binutils ghex
+            sudo dnf install -y nasm mingw64-gcc wine binutils ghex unzip
             ;;
         void)
             echo "Installing for Void Linux..."
-            sudo xbps-install -S nasm cross-x86_64-w64-mingw32-gcc wine binutils ghex
+            sudo xbps-install -S nasm cross-x86_64-w64-mingw32-gcc wine binutils ghex unzip
             ;;
         gentoo)
             echo "Installing for Gentoo..."
-            sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex
+            sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex app-arch/unzip
             ;;
         solus)
             echo "Installing for Solus..."
-            sudo eopkg install nasm mingw-w64 wine binutils ghex
+            sudo eopkg install nasm mingw-w64 wine binutils ghex unzip
             ;;
         suse)
             echo "Installing for openSUSE..."
-            sudo zypper install -y nasm mingw64-gcc wine binutils ghex
+            sudo zypper install -y nasm mingw64-gcc wine binutils ghex unzip
             ;;
         alpine)
             echo "Installing for Alpine Linux..."
-            sudo apk add nasm mingw-w64-gcc wine binutils ghex
+            sudo apk add nasm mingw-w64-gcc wine binutils ghex unzip
             ;;
         puppy)
             echo "Installing for Puppy Linux (using pkg)..."
-            pkg install nasm mingw-w64-gcc wine binutils ghex
+            pkg install nasm mingw-w64-gcc wine binutils ghex unzip
             ;;
     esac
 }
-
 
 if [[ "$OS_ID" =~ (arch|manjaro|endeavouros|cachyos) ]] || [[ "$OS_LIKE" == *"arch"* ]]; then
     install_packages arch
@@ -122,21 +127,33 @@ echo "------------------------------------------"
 echo "install packages complete"
 echo "------------------------------------------"
 
+echo "Step 3: Downloading Irvine Library..."
+read -p "هل تريد تحميل مكتبة د. إيرفين (Irvine Library)؟ حجمها تقريباً 24 ميجابايت. (y/n): " download_irvine
 
-echo "Step 3: Updating launch.json paths to match current directory..."
+if [[ "$download_irvine" =~ ^[Yy]$ ]]; then
+    echo "Downloading Irvine.zip..."
+    curl -fsSL "http://www.asmirvine.com/gettingStartedVS2019/Irvine.zip" -o irvine.zip
+    
+    echo "Extracting Irvine library..."
+    unzip -q irvine.zip -d irvine
+    
+    echo "Cleaning up..."
+    rm irvine.zip
+    echo "Irvine library installed successfully in the 'irvine' directory."
+else
+    echo "Skipping Irvine library download."
+fi
 
+echo "------------------------------------------"
+echo "Step 4: Updating launch.json paths to match current directory..."
+echo "------------------------------------------"
 
 CURRENT_DIR=$(pwd)
 LAUNCH_FILE=".vscode/launch.json"
 
-
 if [ -f "$LAUNCH_FILE" ]; then
-    
     sed -i "s|\"cwd\": \"/mnt/data/github_repos/asm\"|\"cwd\": \"$CURRENT_DIR\"|g" "$LAUNCH_FILE"
-    
-    
     sed -i "s|\"program\": \"/mnt/data/github_repos/asm/build/Debug/outDebug\"|\"program\": \"$CURRENT_DIR/build/Debug/outDebug\"|g" "$LAUNCH_FILE"
-    
     echo "Successfully updated paths in $LAUNCH_FILE to $CURRENT_DIR"
 else
     echo "Warning: $LAUNCH_FILE not found. Skipping path update."
