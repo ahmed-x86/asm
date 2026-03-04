@@ -41,50 +41,81 @@ else
     OS_ID="unknown"
 fi
 
+)
+install_uasm_manual() {
+    if command -v uasm &> /dev/null; then
+        echo "uasm is already installed."
+    else
+        echo "Downloading and installing uasm binary for Linux..."
+        
+        curl -fsSL "https://www.terraspace.co.uk/uasm257_linux64.zip" -o uasm_linux.zip
+        
+        if [ -f "uasm_linux.zip" ]; then
+            echo "Extracting uasm..."
+            unzip -q uasm_linux.zip -d uasm_temp
+            echo "Installing to /usr/local/bin..."
+            sudo mv uasm_temp/uasm /usr/local/bin/
+            sudo chmod +x /usr/local/bin/uasm
+            rm -rf uasm_linux.zip uasm_temp
+            echo "uasm installed successfully!"
+        else
+            echo "Failed to download uasm binary."
+        fi
+    fi
+}
+
 install_packages() {
     case $1 in
         arch)
             echo "Installing for Arch-based system..."
-            sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex unzip
+            sudo pacman -S --needed --noconfirm nasm mingw-w64-gcc wine binutils ghex unzip curl
             
             echo "Installing uasm via yay..."
             if command -v yay &> /dev/null; then
                 yay -S --needed --noconfirm uasm
             else
-                echo "Warning: 'yay' is not installed. Please install 'uasm' manually."
+                echo "Error: 'yay' is not installed. Please install 'yay' first to be able to install 'uasm' on Arch Linux."
             fi
             ;;
         debian)
             echo "Installing for Debian/Ubuntu-based system..."
-            sudo apt update && sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex unzip
+            sudo apt update && sudo apt install -y nasm gcc-mingw-w64 wine binutils ghex unzip curl
+            install_uasm_manual
             ;;
         fedora)
             echo "Installing for Fedora-based system (Bazzit/Nobara)..."
-            sudo dnf install -y nasm mingw64-gcc wine binutils ghex unzip
+            sudo dnf install -y nasm mingw64-gcc wine binutils ghex unzip curl
+            install_uasm_manual
             ;;
         void)
             echo "Installing for Void Linux..."
-            sudo xbps-install -S nasm cross-x86_64-w64-mingw32-gcc wine binutils ghex unzip
+            sudo xbps-install -S nasm cross-x86_64-w64-mingw32-gcc wine binutils ghex unzip curl
+            install_uasm_manual
             ;;
         gentoo)
             echo "Installing for Gentoo..."
-            sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex app-arch/unzip
+            sudo emerge --ask dev-lang/nasm dev-util/mingw64-toolchain app-emulation/wine-vanilla sys-devel/binutils dev-util/ghex app-arch/unzip net-misc/curl
+            install_uasm_manual
             ;;
         solus)
             echo "Installing for Solus..."
-            sudo eopkg install nasm mingw-w64 wine binutils ghex unzip
+            sudo eopkg install nasm mingw-w64 wine binutils ghex unzip curl
+            install_uasm_manual
             ;;
         suse)
             echo "Installing for openSUSE..."
-            sudo zypper install -y nasm mingw64-gcc wine binutils ghex unzip
+            sudo zypper install -y nasm mingw64-gcc wine binutils ghex unzip curl
+            install_uasm_manual
             ;;
         alpine)
             echo "Installing for Alpine Linux..."
-            sudo apk add nasm mingw-w64-gcc wine binutils ghex unzip
+            sudo apk add nasm mingw-w64-gcc wine binutils ghex unzip curl
+            install_uasm_manual
             ;;
         puppy)
             echo "Installing for Puppy Linux (using pkg)..."
-            pkg install nasm mingw-w64-gcc wine binutils ghex unzip
+            pkg install nasm mingw-w64-gcc wine binutils ghex unzip curl
+            install_uasm_manual
             ;;
     esac
 }
@@ -128,7 +159,7 @@ echo "install packages complete"
 echo "------------------------------------------"
 
 echo "Step 3: Downloading Irvine Library..."
-read -p "هل تريد تحميل مكتبة د. إيرفين (Irvine Library)؟ حجمها تقريباً 24 ميجابايت. (y/n): " download_irvine
+read -p "Do you want to download the Irvine Library? It is approximately 24 MB in size. (y/n): " download_irvine
 
 if [[ "$download_irvine" =~ ^[Yy]$ ]]; then
     echo "Downloading Irvine.zip..."
