@@ -119,6 +119,9 @@ else
 fi
 
 echo "------------------------------------------"
+echo "install packages complete"
+echo "------------------------------------------"
+
 
 echo "Step 3: Updating launch.json paths to match current directory..."
 
@@ -141,3 +144,4 @@ fi
 
 echo "------------------------------------------"
 echo "Setup finished successfully! Happy Hacking."
+echo "------------------------------------------"
