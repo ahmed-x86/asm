@@ -77,7 +77,78 @@ pacman -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucr
 # Install UASM with the specific overwrite fix
 pacman -S --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
 
-# 4. Verify Installation
+
+# 4. VS Code Configuration Setup (Local or Cloud)
+Write-Host "Setting up VS Code environment..." -ForegroundColor Cyan
+
+$vscodeDir = Join-Path $currentDir ".vscode"
+$localSetupDir = Join-Path $currentDir "install-windows"
+$jsonFiles = @("c_cpp_properties.json", "launch.json", "settings.json", "tasks.json")
+
+# Create .vscode directory if it doesn't exist
+if (-not (Test-Path $vscodeDir)) {
+    New-Item -ItemType Directory -Path $vscodeDir | Out-Null
+    Write-Host "Created .vscode directory." -ForegroundColor Green
+}
+
+# Check if the local folder exists and contains ALL 4 files
+$localFilesComplete = $true
+if (Test-Path $localSetupDir) {
+    foreach ($file in $jsonFiles) {
+        if (-not (Test-Path (Join-Path $localSetupDir $file))) {
+            $localFilesComplete = $false
+            break
+        }
+    }
+} else {
+    $localFilesComplete = $false
+}
+
+if ($localFilesComplete) {
+    Write-Host "Found local VS Code configs. Copying them to .vscode..." -ForegroundColor Cyan
+    foreach ($file in $jsonFiles) {
+        Copy-Item -Path (Join-Path $localSetupDir $file) -Destination (Join-Path $vscodeDir $file) -Force
+    }
+    Write-Host "VS Code configs copied successfully." -ForegroundColor Green
+} else {
+    Write-Host "Local configs missing or incomplete. Downloading from GitHub..." -ForegroundColor Yellow
+    $githubBaseUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows/"
+    
+    foreach ($file in $jsonFiles) {
+        $fileUrl = $githubBaseUrl + $file
+        $destPath = Join-Path $vscodeDir $file
+        Write-Host "Downloading $file..." -ForegroundColor Cyan
+        Invoke-WebRequest -Uri $fileUrl -OutFile $destPath
+    }
+    Write-Host "VS Code configs downloaded successfully." -ForegroundColor Green
+}
+
+# 5. Download and Extract Irvine32 Library
+Write-Host "--------------------------------------"
+$irvineAnswer = Read-Host "Do you want to download and extract the Irvine library? (y/n)"
+if ($irvineAnswer.Trim().ToLower() -eq "y") {
+    Write-Host "Downloading Irvine library..." -ForegroundColor Cyan
+    $irvineUrl = "http://www.asmirvine.com/gettingStartedVS2019/Irvine.zip"
+    $irvineZipPath = Join-Path $currentDir "Irvine.zip"
+
+    try {
+        Invoke-WebRequest -Uri $irvineUrl -OutFile $irvineZipPath
+        Write-Host "Download complete. Extracting files Here..." -ForegroundColor Cyan
+        
+        # Extract Here (directly to the current directory)
+        Expand-Archive -Path $irvineZipPath -DestinationPath $currentDir -Force
+        
+        Write-Host "Extraction complete. Cleaning up zip file..." -ForegroundColor Cyan
+        Remove-Item -Path $irvineZipPath -Force
+        Write-Host "Irvine library is ready!" -ForegroundColor Green
+    } catch {
+        Write-Host "Failed to download or extract Irvine library. Error: $_" -ForegroundColor Red
+    }
+} else {
+    Write-Host "Skipping Irvine library download." -ForegroundColor Yellow
+}
+
+# 6. Verify Installation
 Write-Host "--------------------------------------"
 Write-Host "Verification:" -ForegroundColor Cyan
 gcc --version | Select-Object -First 1
