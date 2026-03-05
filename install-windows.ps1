@@ -8,29 +8,38 @@ $pathDoneFile = Join-Path $currentDir "add-to-path.txt"
 
 Write-Host "Checking for existing MSYS2 installation..." -ForegroundColor Cyan
 
-# 0. Check if MSYS2 is already installed by checking the folder
-if (Test-Path -Path $msysDir -PathType Container) {
-    Write-Host "MSYS2 folder already exists at $msysDir. Skipping download and installation." -ForegroundColor Green
-}
-else {
-    # Folder doesn't exist, proceed to download
-    Write-Host "Downloading latest MSYS2 installer..." -ForegroundColor Cyan
-
-    # رابط ثابت وآمن
-    $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
-
-    try {
-        Invoke-WebRequest -Uri $url -OutFile $destination -UseBasicParsing
-        Write-Host "Download completed successfully." -ForegroundColor Green
-    }
-    catch {
-        Write-Host "Download failed. Error: $_" -ForegroundColor Red
-        exit
-    }
-
-    if (-not (Test-Path $destination)) {
-        Write-Host "Installer not found after download." -ForegroundColor Red
-        exit
+# 0. Check if MSYS2 is already installed
+if (Test-Path $pacmanExe) {
+    Write-Host "MSYS2 is already installed in $msysDir. Skipping download and installation!" -ForegroundColor Green
+} else {
+    # 1. Download and Install MSYS2
+    if (Test-Path $downloadDoneFile -and (Get-Content $downloadDoneFile -Raw).Trim() -eq "1" -and (Test-Path $destination)) {
+        Write-Host "MSYS2 installer is already downloaded locally." -ForegroundColor Green
+    } else {
+        Write-Host "Fetching the latest MSYS2 download link from GitHub..." -ForegroundColor Cyan
+        
+        # قراءة بيانات آخر إصدار من واجهة برمجة تطبيقات جيت هاب
+        $releaseData = Invoke-RestMethod -Uri "https://api.github.com/repos/msys2/msys2-installer/releases/latest"
+        
+        # البحث عن ملف التثبيت بصيغة exe
+        $url = $releaseData.assets | Where-Object { $_.name -match "^msys2-x86_64-\d+\.exe$" } | Select-Object -ExpandProperty browser_download_url
+        
+        if (-not $url) {
+            Write-Host "Could not fetch dynamic URL. Using fallback..." -ForegroundColor Yellow
+            $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
+        }
+        
+        Write-Host "Latest URL found: $url" -ForegroundColor Green
+        Write-Host "Downloading MSYS2..." -ForegroundColor Cyan
+        Invoke-WebRequest -Uri $url -OutFile $destination
+        
+        if (Test-Path $destination) {
+            Write-Host "Download completed." -ForegroundColor Green
+            Set-Content -Path $downloadDoneFile -Value "1"
+        } else {
+            Write-Host "Download failed." -ForegroundColor Red
+            exit
+        }
     }
 
     # Install MSYS2
@@ -203,27 +212,131 @@ Write-Host "Verification:" -ForegroundColor Cyan
 & "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
 Write-Host "Environment Setup Complete! 🚀" -ForegroundColor Green
 
-# 9. Download and Extract Frhed
+# ---------------------- 9. Download and Extract Frhed (Final Fixed Version) ----------------------
 Write-Host "--------------------------------------"
-$frhedUrl = "https://master.dl.sourceforge.net/project/frhed/3.%20Alpha%20Releases/1.7.1/Frhed-1.7.1-exe.7z?viasf=1"
-$frhed7zPath = Join-Path $currentDir "Frhed-1.7.1-exe.7z"
-$frhedExtractDir = $currentDir  # نفس المجلد
+$frhedAnswer = Read-Host "Do you want to download and setup Frhed Hex Editor in C:\? (y/n)"
+
+if ($frhedAnswer.Trim().ToLower() -eq "y") {
+    
+    $currentDir = Get-Location
+    $frhedUrl = "https://master.dl.sourceforge.net/project/frhed/3.%20Alpha%20Releases/1.7.1/Frhed-1.7.1-exe.7z?viasf=1"
+    $frhed7zPath = Join-Path $currentDir "Frhed.7z"
+    $frhedDestFolder = "C:\Frhed-1.7.1-exe"
+    
+   
+    $sevenZipProgramFiles = "C:\Program Files\7-Zip\7z.exe"
+    $sevenZipPortable = Join-Path $currentDir "7z.exe"
+    
+    $sevenZipExe = ""
+    if (Test-Path $sevenZipProgramFiles) {
+        $sevenZipExe = $sevenZipProgramFiles
+    } elseif (Test-Path $sevenZipPortable) {
+        $sevenZipExe = $sevenZipPortable
+    } else {
+        
+        $sevenZipExe = "7z" 
+    }
 
 
-Write-Host "Downloading Frhed hex editor..." -ForegroundColor Cyan
-Invoke-WebRequest -Uri $frhedUrl -OutFile $frhed7zPath
-Write-Host "Frhed downloaded successfully at $frhed7zPath" -ForegroundColor Green
+    Write-Host "Downloading Frhed hex editor..." -ForegroundColor Cyan
+    try {
+        
+        Invoke-WebRequest -Uri $frhedUrl -OutFile $frhed7zPath -UseBasicParsing
+        Write-Host "Download complete." -ForegroundColor Green
 
+        Write-Host "Extracting Frhed to $frhedDestFolder..." -ForegroundColor Cyan
+        
+        if (-not (Test-Path $frhedDestFolder)) { 
+            New-Item -ItemType Directory -Path $frhedDestFolder -Force | Out-Null 
+        }
 
-$sevenZipExe = "C:\Program Files\7-Zip\7z.exe"
-if (-not (Test-Path $sevenZipExe)) {
-    Write-Host "7-Zip not found in default path. Please install 7-Zip or adjust the path." -ForegroundColor Yellow
+       
+        if ($sevenZipExe -eq "7z") {
+            & 7z x "$frhed7zPath" "-o$frhedDestFolder" -y
+        } else {
+            & "$sevenZipExe" x "$frhed7zPath" "-o$frhedDestFolder" -y
+        }
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Frhed setup successfully in $frhedDestFolder" -ForegroundColor Green
+        } else {
+            Write-Host "Extraction failed. Make sure 7z.exe is in the current folder." -ForegroundColor Red
+        }
+
+        if (Test-Path $frhed7zPath) { Remove-Item -Path $frhed7zPath -Force }
+        
+    } catch {
+        Write-Host "An error occurred during Frhed setup: $_" -ForegroundColor Red
+    }
 } else {
-    
-    Write-Host "Extracting Frhed..." -ForegroundColor Cyan
-    & "$sevenZipExe" x $frhed7zPath "-o$frhedExtractDir" -y
-    Write-Host "Frhed extracted successfully to $frhedExtractDir" -ForegroundColor Green
-    
-    Remove-Item -Path $frhed7zPath -Force
-    Write-Host "Cleanup done, .7z file removed." -ForegroundColor Green
+    Write-Host "Skipping Frhed setup." -ForegroundColor Yellow
 }
+
+Write-Host "--------------------------------------"
+Write-Host "All tasks finished successfully! 🏁" -ForegroundColor Magenta
+
+# ---------------------- 10. Add Frhed to PATH and Create Alias ----------------------
+Write-Host "--------------------------------------"
+Write-Host "Configuring PATH and PowerShell Alias for Frhed..." -ForegroundColor Cyan
+
+
+$frhedPathsToAdd = @(
+    "C:\Frhed-1.7.1-exe",
+    "C:\Frhed-1.7.1-exe\Frhed-1.7.1-exe"
+)
+
+$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+$pathModified = $false
+
+foreach ($p in $frhedPathsToAdd) {
+    if (-not ($currentPath -split ";" | Where-Object { $_ -eq $p })) {
+        $currentPath += ";$p"
+        $pathModified = $true
+    }
+}
+
+if ($pathModified) {
+    [Environment]::SetEnvironmentVariable("Path", $currentPath, "User")
+    $env:Path = $currentPath 
+    Write-Host "Frhed paths added to User PATH successfully." -ForegroundColor Green
+} else {
+    Write-Host "Frhed paths are already in the PATH." -ForegroundColor Green
+}
+
+
+$profilePath = $PROFILE
+
+
+if (-not (Test-Path (Split-Path $profilePath))) {
+    New-Item -Type Directory -Path (Split-Path $profilePath) -Force | Out-Null
+}
+
+
+if (-not (Test-Path $profilePath)) {
+    New-Item -Type File -Path $profilePath -Force | Out-Null
+}
+
+$aliasName = "ghex"
+$exePath = "C:\Frhed-1.7.1-exe\Frhed-1.7.1-exe\Frhed.exe"
+
+
+$aliasContent = "`nfunction $aliasName { & `"$exePath`" `$args }"
+
+$profileContent = ""
+if (Test-Path $profilePath) {
+    $profileContent = Get-Content $profilePath -Raw
+}
+
+
+if (-not $profileContent -or $profileContent -notmatch "function $aliasName") {
+    Add-Content -Path $profilePath -Value $aliasContent -Encoding UTF8
+    Write-Host "Alias '$aliasName' mapped to Frhed successfully in PowerShell Profile." -ForegroundColor Green
+    
+    
+    Invoke-Expression $aliasContent
+} else {
+    Write-Host "Alias '$aliasName' already exists in PowerShell Profile." -ForegroundColor Green
+}
+
+Write-Host "--------------------------------------"
+Write-Host "Step 10 completed! You can now use 'ghex' from any terminal." -ForegroundColor Magenta
