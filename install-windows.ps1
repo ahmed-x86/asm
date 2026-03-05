@@ -285,7 +285,7 @@ foreach ($p in $frhedPathsToAdd) {
 
 if ($pathModified) {
     [Environment]::SetEnvironmentVariable("Path", $currentPath, "User")
-    $env:Path = $currentPath # تحديث الجلسة الحالية
+    $env:Path = $currentPath 
     Write-Host "Frhed paths added to User PATH successfully." -ForegroundColor Green
 } else {
     Write-Host "Frhed paths are already in the PATH." -ForegroundColor Green
