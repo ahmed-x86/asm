@@ -200,27 +200,62 @@ Write-Host "Verification:" -ForegroundColor Cyan
 & "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
 Write-Host "Environment Setup Complete! 🚀" -ForegroundColor Green
 
-# 9. Download and Extract Frhed
+# ---------------------- 9. Download and Extract Frhed with Portable 7-Zip ----------------------
 Write-Host "--------------------------------------"
+
 $frhedUrl = "https://master.dl.sourceforge.net/project/frhed/3.%20Alpha%20Releases/1.7.1/Frhed-1.7.1-exe.7z?viasf=1"
 $frhed7zPath = Join-Path $currentDir "Frhed-1.7.1-exe.7z"
 $frhedExtractDir = $currentDir  # نفس المجلد
+$portable7zPath = Join-Path $currentDir "7z.exe"
 
-
-Write-Host "Downloading Frhed hex editor..." -ForegroundColor Cyan
-Invoke-WebRequest -Uri $frhedUrl -OutFile $frhed7zPath
-Write-Host "Frhed downloaded successfully at $frhed7zPath" -ForegroundColor Green
-
-
+# 1. تحقق من وجود 7-Zip
 $sevenZipExe = "C:\Program Files\7-Zip\7z.exe"
-if (-not (Test-Path $sevenZipExe)) {
-    Write-Host "7-Zip not found in default path. Please install 7-Zip or adjust the path." -ForegroundColor Yellow
+
+if (-not (Test-Path $sevenZipExe) -and -not (Test-Path $portable7zPath)) {
+    Write-Host "7-Zip not found. Downloading portable version..." -ForegroundColor Yellow
+    $sevenZipUrl = "https://www.7-zip.org/a/7z2301-x64.exe"  # آخر نسخة x64
+    $sevenZipInstaller = Join-Path $currentDir "7z_installer.exe"
+    
+    Invoke-WebRequest -Uri $sevenZipUrl -OutFile $sevenZipInstaller
+    Write-Host "7-Zip installer downloaded. Installing portable..." -ForegroundColor Cyan
+    
+    # تثبيت النسخة المحمولة في نفس المجلد
+    Start-Process -FilePath $sevenZipInstaller -ArgumentList "/D=$currentDir" -Wait
+    Remove-Item -Path $sevenZipInstaller -Force
+    Write-Host "7-Zip portable installed in $currentDir" -ForegroundColor Green
+    
+    # استخدم النسخة المحمولة
+    $sevenZipExe = $portable7zPath
+} elseif (Test-Path $sevenZipExe) {
+    Write-Host "7-Zip found in Program Files." -ForegroundColor Green
 } else {
-    
-    Write-Host "Extracting Frhed..." -ForegroundColor Cyan
-    & "$sevenZipExe" x $frhed7zPath "-o$frhedExtractDir" -y
-    Write-Host "Frhed extracted successfully to $frhedExtractDir" -ForegroundColor Green
-    
-    Remove-Item -Path $frhed7zPath -Force
-    Write-Host "Cleanup done, .7z file removed." -ForegroundColor Green
+    Write-Host "Using previously downloaded portable 7-Zip." -ForegroundColor Green
+    $sevenZipExe = $portable7zPath
 }
+
+# 2. تحميل Frhed لو مش موجود
+if (-not (Test-Path $frhed7zPath)) {
+    Write-Host "Downloading Frhed hex editor..." -ForegroundColor Cyan
+    Invoke-WebRequest -Uri $frhedUrl -OutFile $frhed7zPath
+    Write-Host "Frhed downloaded successfully at $frhed7zPath" -ForegroundColor Green
+} else {
+    Write-Host "Frhed already downloaded." -ForegroundColor Green
+}
+
+# 3. فك الضغط باستخدام 7-Zip
+Write-Host "Extracting Frhed..." -ForegroundColor Cyan
+& "$sevenZipExe" x $frhed7zPath "-o$frhedExtractDir" -y
+Write-Host "Frhed extracted successfully to $frhedExtractDir" -ForegroundColor Green
+
+# 4. تنظيف ملف 7z بعد فك الضغط
+Remove-Item -Path $frhed7zPath -Force
+Write-Host "Cleanup done, .7z file removed." -ForegroundColor Green
+# 5. Copy Frhed folder to C:\
+$frhedDest = "C:\Frhed-1.7.1-exe"
+if (Test-Path $frhedDest) {
+    Write-Host "Frhed folder already exists in C:\, overwriting..." -ForegroundColor Yellow
+    Remove-Item -Path $frhedDest -Recurse -Force
+}
+
+Copy-Item -Path $frhedExtractDir -Destination $frhedDest -Recurse -Force
+Write-Host "Frhed copied successfully to $frhedDest" -ForegroundColor Green
