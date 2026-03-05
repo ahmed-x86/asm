@@ -19,10 +19,10 @@ if (Test-Path $pacmanExe) {
     } else {
         Write-Host "Fetching the latest MSYS2 download link from GitHub..." -ForegroundColor Cyan
         
-        # قراءة بيانات آخر إصدار من واجهة برمجة تطبيقات جيت هاب
+        
         $releaseData = Invoke-RestMethod -Uri "https://api.github.com/repos/msys2/msys2-installer/releases/latest"
         
-        # البحث عن ملف التثبيت بصيغة exe
+        
         $url = $releaseData.assets | Where-Object { $_.name -match "^msys2-x86_64-\d+\.exe$" } | Select-Object -ExpandProperty browser_download_url
         
         if (-not $url) {
