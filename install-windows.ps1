@@ -54,28 +54,27 @@ if (-not (Test-Path $pathDoneFile)) {
     # Update Windows permanently
     [Environment]::SetEnvironmentVariable("Path", $currentPath, "User")
     
-    # Update current PowerShell session so 'pacman' works immediately below
+    # Update current PowerShell session just in case
     $env:Path = $currentPath 
     
     Set-Content -Path $pathDoneFile -Value "1"
     Write-Host "Paths added successfully." -ForegroundColor Green
 } else {
     Write-Host "Paths are already added." -ForegroundColor Green
-    # Ensure current session has the paths if the script is run again in a fresh window
     $env:Path = [Environment]::GetEnvironmentVariable("Path", "User")
 }
 
-# 3. Update MSYS2 and Install Packages automatically
+# 3. Update MSYS2 and Install Packages automatically using Absolute Paths
 Write-Host "Syncing pacman databases and installing packages..." -ForegroundColor Cyan
 
 # Update databases first
-pacman -Sy --noconfirm
+& "C:\msys64\usr\bin\pacman.exe" -Sy --noconfirm
 
-# Install all standard packages in one go (saves time and resolves dependencies together)
-pacman -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make
+# Install all standard packages in one go
+& "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make
 
 # Install UASM with the specific overwrite fix
-pacman -S --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
+& "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
 
 
 # 4. VS Code Configuration Setup (Local or Cloud)
@@ -148,12 +147,12 @@ if ($irvineAnswer.Trim().ToLower() -eq "y") {
     Write-Host "Skipping Irvine library download." -ForegroundColor Yellow
 }
 
-# 6. Verify Installation
+# 6. Verify Installation using Absolute Paths
 Write-Host "--------------------------------------"
 Write-Host "Verification:" -ForegroundColor Cyan
-gcc --version | Select-Object -First 1
-gdb --version | Select-Object -First 1
-g++ --version | Select-Object -First 1
-make --version | Select-Object -First 1
-nasm --version
+& "C:\msys64\ucrt64\bin\gcc.exe" --version | Select-Object -First 1
+& "C:\msys64\ucrt64\bin\gdb.exe" --version | Select-Object -First 1
+& "C:\msys64\ucrt64\bin\g++.exe" --version | Select-Object -First 1
+& "C:\msys64\usr\bin\make.exe" --version | Select-Object -First 1
+& "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
 Write-Host "Environment Setup Complete! 🚀" -ForegroundColor Green
