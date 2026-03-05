@@ -167,7 +167,30 @@ if ($irvineAnswer.Trim().ToLower() -eq "y") {
     Write-Host "Skipping Irvine library download." -ForegroundColor Yellow
 }
 
-# 6. Verify Installation using Absolute Paths
+# 7. Update launch.json with the dynamic current directory
+Write-Host "--------------------------------------"
+Write-Host "Updating VS Code launch.json paths..." -ForegroundColor Cyan
+$launchJsonPath = Join-Path $vscodeDir "launch.json"
+
+if (Test-Path $launchJsonPath) {
+   
+    $launchContent = Get-Content $launchJsonPath -Raw
+    
+    
+    $forwardSlashDir = $currentDir -replace '\\', '/'
+    
+    
+    $launchContent = $launchContent -ireplace "c:/Users/ahmed/Downloads/asm", $forwardSlashDir
+    
+   
+    Set-Content -Path $launchJsonPath -Value $launchContent -Encoding UTF8
+    
+    Write-Host "launch.json updated successfully with path: $forwardSlashDir" -ForegroundColor Green
+} else {
+    Write-Host "launch.json not found to update." -ForegroundColor Yellow
+}
+
+# 8. Verify Installation using Absolute Paths
 Write-Host "--------------------------------------"
 Write-Host "Verification:" -ForegroundColor Cyan
 & "C:\msys64\ucrt64\bin\gcc.exe" --version | Select-Object -First 1
