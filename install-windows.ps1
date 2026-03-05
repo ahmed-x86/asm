@@ -4,50 +4,33 @@ $msysDir = "C:\msys64"
 $pacmanExe = Join-Path $msysDir "usr\bin\pacman.exe"
 $currentDir = Get-Location
 $destination = Join-Path $currentDir "msys2.exe"
-$downloadDoneFile = Join-Path $currentDir "downloading-done.txt"
 $pathDoneFile = Join-Path $currentDir "add-to-path.txt"
 
 Write-Host "Checking for existing MSYS2 installation..." -ForegroundColor Cyan
 
-# 0. Check if MSYS2 is already installed
-if (Test-Path $pacmanExe) {
-    Write-Host "MSYS2 is already installed in $msysDir. Skipping installation." -ForegroundColor Green
+# 0. Check if MSYS2 is already installed by checking the folder
+if (Test-Path -Path $msysDir -PathType Container) {
+    Write-Host "MSYS2 folder already exists at $msysDir. Skipping download and installation." -ForegroundColor Green
 }
 else {
-    # Check if installer already downloaded
-    $downloadReady = $false
+    # Folder doesn't exist, proceed to download
+    Write-Host "Downloading latest MSYS2 installer..." -ForegroundColor Cyan
 
-    if (Test-Path $downloadDoneFile) {
-        $content = (Get-Content $downloadDoneFile -Raw).Trim()
-        if ($content -eq "1" -and (Test-Path $destination)) {
-            $downloadReady = $true
-        }
+    # رابط ثابت وآمن
+    $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
+
+    try {
+        Invoke-WebRequest -Uri $url -OutFile $destination -UseBasicParsing
+        Write-Host "Download completed successfully." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Download failed. Error: $_" -ForegroundColor Red
+        exit
     }
 
-    if (-not $downloadReady) {
-        Write-Host "Downloading latest MSYS2 installer..." -ForegroundColor Cyan
-
-        # رابط ثابت وآمن
-        $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
-
-        try {
-            Invoke-WebRequest -Uri $url -OutFile $destination -UseBasicParsing
-        }
-        catch {
-            Write-Host "Download failed." -ForegroundColor Red
-            exit
-        }
-
-        if (-not (Test-Path $destination)) {
-            Write-Host "Installer not found after download." -ForegroundColor Red
-            exit
-        }
-
-        Write-Host "Download completed." -ForegroundColor Green
-        Set-Content $downloadDoneFile "1"
-    }
-    else {
-        Write-Host "MSYS2 installer already downloaded." -ForegroundColor Green
+    if (-not (Test-Path $destination)) {
+        Write-Host "Installer not found after download." -ForegroundColor Red
+        exit
     }
 
     # Install MSYS2
@@ -66,7 +49,7 @@ else {
 
         # تحقق من نجاح التثبيت
         if (-not (Test-Path $pacmanExe)) {
-            Write-Host "MSYS2 installation failed." -ForegroundColor Red
+            Write-Host "MSYS2 installation failed. pacman.exe not found." -ForegroundColor Red
             exit
         }
 
