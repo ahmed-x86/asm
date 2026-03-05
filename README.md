@@ -1,5 +1,7 @@
 # Assembly Development Environment 🚀
 
+![Windows 10](https://img.shields.io/badge/Windows_10-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Windows 11](https://img.shields.io/badge/Windows_11-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 ![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?style=for-the-badge&logo=arch-linux&logoColor=white)
 ![Manjaro](https://img.shields.io/badge/Manjaro-35BF5C?style=for-the-badge&logo=manjaro&logoColor=white)
 ![CachyOS](https://img.shields.io/badge/CachyOS-0080FF?style=for-the-badge&logo=arch-linux&logoColor=white)
@@ -20,43 +22,64 @@
 ![openSUSE](https://img.shields.io/badge/openSUSE-73BA48?style=for-the-badge&logo=opensuse&logoColor=white)
 ![Alpine Linux](https://img.shields.io/badge/Alpine_Linux-0D597F?style=for-the-badge&logo=alpine-linux&logoColor=white)
 
-An all-in-one repository designed to kickstart your Assembly (ASM) development on Linux. This environment provides out-of-the-box support for Linux x64 and Windows (32/64-bit) targets, featuring pre-configured VS Code settings for a seamless workflow.
-🛠️ Installation
+### An all-in-one repository designed to kickstart your Assembly (ASM) development. This environment provides out-of-the-box support for Linux x64 and Windows (x86/x64), featuring pre-configured VS Code settings for a seamless workflow.
+## 🛠️ Quick Installation
 
-You can set up your environment using one of the two following methods:
-## 1. One-Line Installer (Online)
+Choose your weapon (Operating System) and run the corresponding command to configure your environment immediately:
+# 🐧 Linux (One-Line Installer)
 
-Use this command to configure your current directory immediately without cloning the entire repo:
+Supports Arch, Debian/Ubuntu, Fedora, and their derivatives.
 
-```
+
+```bash
 bash <(curl -sSL https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-linux.sh)
 ```
-## 2. Local Setup (Manual)
 
-If you have already cloned the repository or prefer a manual installation:
-Bash
+### 🪟 Windows (PowerShell Installer)
+
+Optimized for Windows 10 & 11 via PowerShell.
+PowerShell
+```ps
+irm https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows.ps1 | iex
 ```
+# 🏗️ Manual Setup (Local)
+
+If you prefer to clone the repository and run the scripts locally:
+
+# For Linux:
+```Bash
 git clone https://github.com/ahmed-x86/asm.git
 cp -r asm/. .
 chmod +x install-linux.sh
 ./install-linux.sh
 ```
-## ✨ Key Features
+## For Windows:
+```PowerShell
+git clone https://github.com/ahmed-x86/asm.git
+xcopy /E /I /Y asm\* .
+.\install-windows.ps1
+```
+# ✨ Key Features
 
-Smart Distro Detection: Automatically detects and installs dependencies for Arch Linux, Debian/Ubuntu, and Fedora.
+Dual-Platform Support: Native installers for both Windows and Linux, ensuring your dev environment is consistent everywhere.
 
-VS Code Integration: Pre-configured tasks.json and launch.json allow you to build and run your code with a single shortcut (Ctrl+Shift+B).
+VS Code Integration: Pre-configured tasks.json and launch.json allow you to build and debug your code with a single shortcut (Ctrl+Shift+B).
 
-Cross-Platform Support: Ready-to-use toolchains (NASM, MinGW-w64, Wine) to compile and test Windows binaries directly from your Linux terminal.
+Smart Dependency Management:
 
-Optimized for Arch: Because "I use Arch btw" shouldn't mean spending three hours on config. 😎
+On Linux: Automatically detects your package manager (pacman, apt, dnf) and installs NASM, GCC, and GDB.
 
-## 💡 Improvements Made:
+On Windows: Sets up NASM and required build tools automatically.
 
-Terminology: Changed "Direct Installation" to "One-Line Installer," which is more common in DevOps circles.
+Cross-Compilation: Ready-to-use toolchains to compile and test Windows binaries directly from Linux using Wine and MinGW.
 
-Clarity: Specified that the VS Code integration handles both building and debugging.
+Note for Arch Users: Because "I use Arch btw" shouldn't mean spending three hours on config. We've got you covered. 😎
 
-Tone: Kept the "Arch Linux" humor but refined the technical descriptions to sound more authoritative.
+💡 What's New?
+
+Windows Native Support: Added a dedicated PowerShell script for one-click setup on Windows.
+
+Improved Toolchain: Better handling of environment variables for NASM on both platforms.
+# i use arch btw
 
 ---
