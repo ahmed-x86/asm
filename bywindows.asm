@@ -1,7 +1,7 @@
 ; bywindows.asm - pure Windows API 32-bit
 
 section .data
-    msg db 'hi i use arch btw from win32', 10, 0  ; أضفنا سطرًا جديدًا (10) لمخرجات أنظف
+    msg db 'hi i use arch btw from win32 windows 10 pro', 10, 0  ; أضفنا سطرًا جديدًا (10) لمخرجات أنظف
     msg_len equ $-msg
 
 section .bss

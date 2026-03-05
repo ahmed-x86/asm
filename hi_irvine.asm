@@ -1,7 +1,7 @@
 INCLUDE Irvine32.inc
 
 .data
-    msg BYTE "hi i use arch btw from win32 (Irvine Edition)", 0
+    msg BYTE "hi i use arch btw from win32 (Irvine Edition) from windows 10 pro vm", 0
 
 .code
 main PROC

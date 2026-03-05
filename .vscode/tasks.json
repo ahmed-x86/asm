@@ -2,49 +2,41 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build & Run Irvine32 (Windows 32-bit)",
+            "label": "assemble win64 (NASM)",
             "type": "shell",
-            "command": "uasm -coff -Iirvine ${file} && i686-w64-mingw32-gcc ${fileBasenameNoExtension}.o irvine/Irvine32.lib -o ${fileBasenameNoExtension}.exe -nostdlib -lkernel32 -luser32 -Wl,-e_main -Wl,--subsystem,console && wine ${fileBasenameNoExtension}.exe",
+            "command": "C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 \"${file}\" -o \"${fileDirname}\\${fileBasenameNoExtension}.obj\" ; C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe \"${fileDirname}\\${fileBasenameNoExtension}.obj\" -o \"${fileDirname}\\${fileBasenameNoExtension}.exe\" -nostartfiles -lkernel32 -luser32 ; & \"${fileDirname}\\${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "presentation": {
                 "reveal": "always",
-                "panel": "shared"
+                "panel": "shared",
+                "focus": true,
+                "clear": true
             },
             "problemMatcher": []
         },
         {
-            "label": "Build & Run Windows 32-bit",
+            "label": "assemble win32 (NASM)",
             "type": "shell",
-            "command": "nasm -f win32 ${file} -o ${fileBasenameNoExtension}.obj && i686-w64-mingw32-gcc ${fileBasenameNoExtension}.obj -o ${fileBasenameNoExtension}.exe -nostartfiles -lkernel32 -luser32 && wine ${fileBasenameNoExtension}.exe",
+            "command": "C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 \"${file}\" -o \"${fileDirname}\\${fileBasenameNoExtension}.obj\" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe \"${fileDirname}\\${fileBasenameNoExtension}.obj\" -o \"${fileDirname}\\${fileBasenameNoExtension}.exe\" -nostartfiles -lkernel32 -luser32 ; & \"${fileDirname}\\${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "presentation": {
                 "reveal": "always",
-                "panel": "shared"
+                "panel": "shared",
+                "focus": true,
+                "clear": true
             },
             "problemMatcher": []
         },
         {
-            "label": "Build & Run Windows 64-bit",
+            "label": "assemble win32 Irvine (UASM)",
             "type": "shell",
-            "command": "nasm -f win64 ${file} -o ${fileBasenameNoExtension}.obj && x86_64-w64-mingw32-gcc ${fileBasenameNoExtension}.obj -o ${fileBasenameNoExtension}.exe -nostartfiles -lkernel32 -luser32 && wine ${fileBasenameNoExtension}.exe",
+            "command": "C:\\msys64\\mingw64\\bin\\uasm.exe -coff -I\"${workspaceFolder}\\irvine\" -Fo\"${fileDirname}\\${fileBasenameNoExtension}.obj\" \"${file}\" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe \"${fileDirname}\\${fileBasenameNoExtension}.obj\" \"${workspaceFolder}\\irvine\\Irvine32.lib\" -o \"${fileDirname}\\${fileBasenameNoExtension}.exe\" -nostdlib -lkernel32 -luser32 '-Wl,-e_main' '-Wl,--subsystem,console' ; & \"${fileDirname}\\${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "presentation": {
                 "reveal": "always",
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Build & Run Linux 64-bit",
-            "type": "shell",
-            "command": "nasm -f elf64 ${file} -o ${fileBasenameNoExtension}.o && ld ${fileBasenameNoExtension}.o -o ${fileBasenameNoExtension} && ./${fileBasenameNoExtension}",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "reveal": "always",
-                "panel": "shared"
+                "panel": "shared",
+                "focus": true,
+                "clear": true
             },
             "problemMatcher": []
         }
