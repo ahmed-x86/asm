@@ -63,7 +63,7 @@ xcopy /E /I /Y asm\* .
 
 Dual-Platform Support: Native installers for both Windows and Linux, ensuring your dev environment is consistent everywhere.
 
-VS Code Integration: Pre-configured tasks.json and launch.json allow you to build and debug your code with a single shortcut (Ctrl+Shift+B).
+VS Code Integration: Pre-configured tasks.json and launch.json allow you to build and debug your code with a single shortcut (Ctrl+Shift+P).
 
 Smart Dependency Management:
 
