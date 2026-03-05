@@ -1,8 +1,0 @@
-************************************* Invoked: Wed Mar 4 12:29:34 2026
-[0] Arguments: C:\Users\ahmed\Downloads\asm\msys2.exe, in, --confirm-command, --accept-messages, --root, C:\msys64
-[25] Operations sanity check succeeded.
-[46] Using metadata cache from "C:/Users/ahmed/AppData/Local/cache\\qt-installer-framework\\d75f1c19-3379-3717-ae8d-1404b51494a9"
-[47] Found 0 cached items.
-[56] Loaded control script ":/metadata/installer-config/control_js"
-[57] TargetDirectoryInUse : Error : The directory you selected already exists and contains an installation. Choose a different target for installation.
-[58] Answer: "Ok"
