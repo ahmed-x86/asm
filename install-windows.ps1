@@ -1,50 +1,56 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-Write-Host "Fetching the latest MSYS2 download link from GitHub..." -ForegroundColor Cyan
-
-
-$releaseData = Invoke-RestMethod -Uri "https://api.github.com/repos/msys2/msys2-installer/releases/latest"
-
-
-$url = $releaseData.assets | Where-Object { $_.name -match "^msys2-x86_64-\d+\.exe$" } | Select-Object -ExpandProperty browser_download_url
-
-if (-not $url) {
-    Write-Host "Could not fetch dynamic URL. Using fallback..." -ForegroundColor Yellow
-    $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
-}
-
-Write-Host "Latest URL found: $url" -ForegroundColor Green
-
+$msysDir = "C:\msys64"
+$pacmanExe = Join-Path $msysDir "usr\bin\pacman.exe"
 $currentDir = Get-Location
 $destination = Join-Path $currentDir "msys2.exe"
 $downloadDoneFile = Join-Path $currentDir "downloading-done.txt"
 $pathDoneFile = Join-Path $currentDir "add-to-path.txt"
 
-# 1. Download and Install MSYS2
-if (Test-Path $downloadDoneFile) {
-    $content = Get-Content $downloadDoneFile -Raw
-    if ($content.Trim() -eq "1") {
-        Write-Host "MSYS2 installer is already downloaded." -ForegroundColor Green
-    }
+Write-Host "Checking for existing MSYS2 installation..." -ForegroundColor Cyan
+
+# 0. Check if MSYS2 is already installed
+if (Test-Path $pacmanExe) {
+    Write-Host "MSYS2 is already installed in $msysDir. Skipping download and installation!" -ForegroundColor Green
 } else {
-    Write-Host "Downloading MSYS2..." -ForegroundColor Cyan
-    Invoke-WebRequest -Uri $url -OutFile $destination
-
-    if (Test-Path $destination) {
-        Write-Host "Download completed." -ForegroundColor Green
-        Set-Content -Path $downloadDoneFile -Value "1"
-
-        $answer = Read-Host "Do you want to skip installing MSYS2? (y/n)"
-        if ($answer.Trim().ToLower() -eq "y") {
-            Write-Host "Skipping MSYS2 installation." -ForegroundColor Yellow
-        } else {
-            Write-Host "Installing MSYS2 silently. Please wait..." -ForegroundColor Cyan
-            Start-Process -FilePath $destination -ArgumentList "in --confirm-command --accept-messages --root C:\msys64" -Wait
-            Write-Host "MSYS2 installed successfully in C:\msys64" -ForegroundColor Green
-        }
+    # 1. Download and Install MSYS2
+    if (Test-Path $downloadDoneFile -and (Get-Content $downloadDoneFile -Raw).Trim() -eq "1" -and (Test-Path $destination)) {
+        Write-Host "MSYS2 installer is already downloaded locally." -ForegroundColor Green
     } else {
-        Write-Host "Download failed." -ForegroundColor Red
-        exit
+        Write-Host "Fetching the latest MSYS2 download link from GitHub..." -ForegroundColor Cyan
+        
+        # قراءة بيانات آخر إصدار من واجهة برمجة تطبيقات جيت هاب
+        $releaseData = Invoke-RestMethod -Uri "https://api.github.com/repos/msys2/msys2-installer/releases/latest"
+        
+        # البحث عن ملف التثبيت بصيغة exe
+        $url = $releaseData.assets | Where-Object { $_.name -match "^msys2-x86_64-\d+\.exe$" } | Select-Object -ExpandProperty browser_download_url
+        
+        if (-not $url) {
+            Write-Host "Could not fetch dynamic URL. Using fallback..." -ForegroundColor Yellow
+            $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
+        }
+        
+        Write-Host "Latest URL found: $url" -ForegroundColor Green
+        Write-Host "Downloading MSYS2..." -ForegroundColor Cyan
+        Invoke-WebRequest -Uri $url -OutFile $destination
+        
+        if (Test-Path $destination) {
+            Write-Host "Download completed." -ForegroundColor Green
+            Set-Content -Path $downloadDoneFile -Value "1"
+        } else {
+            Write-Host "Download failed." -ForegroundColor Red
+            exit
+        }
+    }
+
+    # Install step (only triggers if we had to download or if it was downloaded but not installed)
+    $answer = Read-Host "Do you want to skip installing MSYS2? (y/n)"
+    if ($answer.Trim().ToLower() -eq "y") {
+        Write-Host "Skipping MSYS2 installation." -ForegroundColor Yellow
+    } else {
+        Write-Host "Installing MSYS2 silently. Please wait..." -ForegroundColor Cyan
+        Start-Process -FilePath $destination -ArgumentList "in --confirm-command --accept-messages --root $msysDir" -Wait
+        Write-Host "MSYS2 installed successfully in $msysDir" -ForegroundColor Green
     }
 }
 
@@ -84,7 +90,7 @@ Write-Host "Syncing pacman databases and installing packages..." -ForegroundColo
 # Update databases first
 & "C:\msys64\usr\bin\pacman.exe" -Sy --noconfirm
 
-# Install all standard packages in one go (g++ is included in gcc)
+# Install all standard packages in one go
 & "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make
 
 # Install UASM with the specific overwrite fix
