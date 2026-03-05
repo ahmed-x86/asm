@@ -11,46 +11,66 @@ Write-Host "Checking for existing MSYS2 installation..." -ForegroundColor Cyan
 
 # 0. Check if MSYS2 is already installed
 if (Test-Path $pacmanExe) {
-    Write-Host "MSYS2 is already installed in $msysDir. Skipping download and installation!" -ForegroundColor Green
-} else {
-    # 1. Download and Install MSYS2
-    if (Test-Path $downloadDoneFile -and (Get-Content $downloadDoneFile -Raw).Trim() -eq "1" -and (Test-Path $destination)) {
-        Write-Host "MSYS2 installer is already downloaded locally." -ForegroundColor Green
-    } else {
-        Write-Host "Fetching the latest MSYS2 download link from GitHub..." -ForegroundColor Cyan
-        
-        # قراءة بيانات آخر إصدار من واجهة برمجة تطبيقات جيت هاب
-        $releaseData = Invoke-RestMethod -Uri "https://api.github.com/repos/msys2/msys2-installer/releases/latest"
-        
-        # البحث عن ملف التثبيت بصيغة exe
-        $url = $releaseData.assets | Where-Object { $_.name -match "^msys2-x86_64-\d+\.exe$" } | Select-Object -ExpandProperty browser_download_url
-        
-        if (-not $url) {
-            Write-Host "Could not fetch dynamic URL. Using fallback..." -ForegroundColor Yellow
-            $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
-        }
-        
-        Write-Host "Latest URL found: $url" -ForegroundColor Green
-        Write-Host "Downloading MSYS2..." -ForegroundColor Cyan
-        Invoke-WebRequest -Uri $url -OutFile $destination
-        
-        if (Test-Path $destination) {
-            Write-Host "Download completed." -ForegroundColor Green
-            Set-Content -Path $downloadDoneFile -Value "1"
-        } else {
-            Write-Host "Download failed." -ForegroundColor Red
-            exit
+    Write-Host "MSYS2 is already installed in $msysDir. Skipping installation." -ForegroundColor Green
+}
+else {
+    # Check if installer already downloaded
+    $downloadReady = $false
+
+    if (Test-Path $downloadDoneFile) {
+        $content = (Get-Content $downloadDoneFile -Raw).Trim()
+        if ($content -eq "1" -and (Test-Path $destination)) {
+            $downloadReady = $true
         }
     }
 
-    # Install step (only triggers if we had to download or if it was downloaded but not installed)
+    if (-not $downloadReady) {
+        Write-Host "Downloading latest MSYS2 installer..." -ForegroundColor Cyan
+
+        # رابط ثابت وآمن
+        $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
+
+        try {
+            Invoke-WebRequest -Uri $url -OutFile $destination -UseBasicParsing
+        }
+        catch {
+            Write-Host "Download failed." -ForegroundColor Red
+            exit
+        }
+
+        if (-not (Test-Path $destination)) {
+            Write-Host "Installer not found after download." -ForegroundColor Red
+            exit
+        }
+
+        Write-Host "Download completed." -ForegroundColor Green
+        Set-Content $downloadDoneFile "1"
+    }
+    else {
+        Write-Host "MSYS2 installer already downloaded." -ForegroundColor Green
+    }
+
+    # Install MSYS2
     $answer = Read-Host "Do you want to skip installing MSYS2? (y/n)"
+
     if ($answer.Trim().ToLower() -eq "y") {
         Write-Host "Skipping MSYS2 installation." -ForegroundColor Yellow
-    } else {
-        Write-Host "Installing MSYS2 silently. Please wait..." -ForegroundColor Cyan
-        Start-Process -FilePath $destination -ArgumentList "in --confirm-command --accept-messages --root $msysDir" -Wait
-        Write-Host "MSYS2 installed successfully in $msysDir" -ForegroundColor Green
+    }
+    else {
+        Write-Host "Installing MSYS2..." -ForegroundColor Cyan
+
+        Start-Process `
+            -FilePath $destination `
+            -ArgumentList "in --confirm-command --accept-messages --root $msysDir" `
+            -Wait
+
+        # تحقق من نجاح التثبيت
+        if (-not (Test-Path $pacmanExe)) {
+            Write-Host "MSYS2 installation failed." -ForegroundColor Red
+            exit
+        }
+
+        Write-Host "MSYS2 installed successfully." -ForegroundColor Green
     }
 }
 
