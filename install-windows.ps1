@@ -199,3 +199,28 @@ Write-Host "Verification:" -ForegroundColor Cyan
 & "C:\msys64\usr\bin\make.exe" --version | Select-Object -First 1
 & "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
 Write-Host "Environment Setup Complete! 🚀" -ForegroundColor Green
+
+# 9. Download and Extract Frhed
+Write-Host "--------------------------------------"
+$frhedUrl = "https://master.dl.sourceforge.net/project/frhed/3.%20Alpha%20Releases/1.7.1/Frhed-1.7.1-exe.7z?viasf=1"
+$frhed7zPath = Join-Path $currentDir "Frhed-1.7.1-exe.7z"
+$frhedExtractDir = $currentDir  # نفس المجلد
+
+
+Write-Host "Downloading Frhed hex editor..." -ForegroundColor Cyan
+Invoke-WebRequest -Uri $frhedUrl -OutFile $frhed7zPath
+Write-Host "Frhed downloaded successfully at $frhed7zPath" -ForegroundColor Green
+
+
+$sevenZipExe = "C:\Program Files\7-Zip\7z.exe"
+if (-not (Test-Path $sevenZipExe)) {
+    Write-Host "7-Zip not found in default path. Please install 7-Zip or adjust the path." -ForegroundColor Yellow
+} else {
+    
+    Write-Host "Extracting Frhed..." -ForegroundColor Cyan
+    & "$sevenZipExe" x $frhed7zPath "-o$frhedExtractDir" -y
+    Write-Host "Frhed extracted successfully to $frhedExtractDir" -ForegroundColor Green
+    
+    Remove-Item -Path $frhed7zPath -Force
+    Write-Host "Cleanup done, .7z file removed." -ForegroundColor Green
+}
