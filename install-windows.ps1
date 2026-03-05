@@ -17,13 +17,27 @@ else {
 
     $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
 
+    # إجبار الويندوز على استخدام بروتوكولات أمان حديثة لتجنب مشاكل التحميل
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+    $ProgressPreference = 'SilentlyContinue' # إخفاء شريط التحميل لتسريع العملية ومنع التجميد
+
     try {
         Invoke-WebRequest -Uri $url -OutFile $destination -UseBasicParsing
-        Write-Host "Download completed successfully." -ForegroundColor Green
+        Write-Host "Download completed successfully via PowerShell." -ForegroundColor Green
     }
     catch {
-        Write-Host "Download failed. Error: $_" -ForegroundColor Red
-        exit
+        Write-Host "PowerShell download failed, trying native curl.exe..." -ForegroundColor Yellow
+        try {
+            curl.exe -L -o $destination $url
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "Download completed successfully via curl." -ForegroundColor Green
+            } else {
+                throw "curl exited with error code $LASTEXITCODE"
+            }
+        } catch {
+            Write-Host "Download completely failed on this machine. Error: $_" -ForegroundColor Red
+            exit
+        }
     }
 
     if (-not (Test-Path $destination)) {
@@ -31,30 +45,30 @@ else {
         exit
     }
 
-    # Install MSYS2
+    # Install MSYS2 with GUI
     $answer = Read-Host "Do you want to skip installing MSYS2? (y/n)"
 
     if ($answer.Trim().ToLower() -eq "y") {
         Write-Host "Skipping MSYS2 installation." -ForegroundColor Yellow
     }
     else {
-        Write-Host "Installing MSYS2..." -ForegroundColor Cyan
+        Write-Host "Opening MSYS2 installer..." -ForegroundColor Cyan
+        Write-Host "Please complete the setup wizard (Next -> Next -> Finish). IMPORTANT: Keep the default installation path (C:\msys64)." -ForegroundColor Yellow
+        Write-Host "The script is paused and waiting for you to finish the installation..." -ForegroundColor Magenta
 
-        Start-Process `
-            -FilePath $destination `
-            -ArgumentList "in --confirm-command --accept-messages --root $msysDir" `
-            -Wait
+        # فتح الواجهة الرسومية والانتظار حتى يغلقها المستخدم
+        Start-Process -FilePath $destination -Wait
 
         if (-not (Test-Path $pacmanExe)) {
-            Write-Host "MSYS2 installation failed. pacman.exe not found." -ForegroundColor Red
+            Write-Host "MSYS2 installation failed or was cancelled. pacman.exe not found." -ForegroundColor Red
             exit
         }
 
-        Write-Host "MSYS2 installed successfully." -ForegroundColor Green
+        Write-Host "MSYS2 installed successfully. Resuming script..." -ForegroundColor Green
     }
 }
 
-# 2. Add to PATH dynamically without any text files
+# 2. Add to PATH dynamically
 Write-Host "Checking MSYS2 Environment Paths..." -ForegroundColor Cyan
 $pathsToAdd = @(
     "C:\msys64\usr\bin",
@@ -74,9 +88,7 @@ foreach ($p in $pathsToAdd) {
 }
 
 if ($pathChanged) {
-    # Update Windows permanently
     [Environment]::SetEnvironmentVariable("Path", $currentPath, "User")
-    # Update current PowerShell session
     $env:Path = $currentPath 
     Write-Host "Paths added successfully." -ForegroundColor Green
 } else {
@@ -87,8 +99,8 @@ if ($pathChanged) {
 Write-Host "Syncing pacman databases and installing packages..." -ForegroundColor Cyan
 
 & "C:\msys64\usr\bin\pacman.exe" -Sy --noconfirm
-& "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make
-& "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
+& "C:\msys64\usr\bin\pacman.exe" -S --needed --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make
+& "C:\msys64\usr\bin\pacman.exe" -S --needed --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
 
 
 # 4. VS Code Configuration Setup
@@ -143,6 +155,7 @@ if ($irvineAnswer.Trim().ToLower() -eq "y") {
     $irvineZipPath = Join-Path $currentDir "Irvine.zip"
 
     try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
         Invoke-WebRequest -Uri $irvineUrl -OutFile $irvineZipPath
         Write-Host "Download complete. Extracting files Here..." -ForegroundColor Cyan
         
@@ -191,7 +204,8 @@ $frhed7zPath = Join-Path $currentDir "Frhed-1.7.1-exe.7z"
 $frhedExtractDir = $currentDir
 
 Write-Host "Downloading Frhed hex editor..." -ForegroundColor Cyan
-Invoke-WebRequest -Uri $frhedUrl -OutFile $frhed7zPath
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+Invoke-WebRequest -Uri $frhedUrl -OutFile $frhed7zPath -UseBasicParsing
 Write-Host "Frhed downloaded successfully at $frhed7zPath" -ForegroundColor Green
 
 $sevenZipExe = "C:\Program Files\7-Zip\7z.exe"
