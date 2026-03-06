@@ -345,3 +345,48 @@ if (-not $profileContent -or $profileContent -notmatch "function $aliasName") {
 
 Write-Host "--------------------------------------"
 Write-Host "Step 10 completed! You can now use 'ghex' from any terminal." -ForegroundColor Magenta
+
+# ---------------------- 11. Download Examples ----------------------
+Write-Host "--------------------------------------"
+$downloadExamples = Read-Host "Do you want to download example Assembly files (bywin32, bywin64, hi_irvine)? (y/n)"
+
+if ($downloadExamples.Trim().ToLower() -eq "y") {
+    Write-Host "Downloading example files to the current directory..." -ForegroundColor Cyan
+
+    # روابط الأمثلة
+    $exampleUrls = @(
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin32.asm",
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin64.asm",
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/hi_irvine.asm"
+    )
+
+    $allExamplesSuccess = $true
+
+    # تحميل كل ملف في المسار الحالي
+    foreach ($url in $exampleUrls) {
+        # استخراج اسم الملف من الرابط
+        $fileName = $url.Split('/')[-1]
+        $destPath = Join-Path $currentDir $fileName
+        
+        Write-Host " -> Fetching $fileName..." -ForegroundColor Gray
+        try {
+            Invoke-WebRequest -Uri $url -OutFile $destPath -UseBasicParsing
+            Write-Host "    [OK] Downloaded: $fileName" -ForegroundColor Green
+        } catch {
+            Write-Host "    [X] Error downloading: $fileName" -ForegroundColor Red
+            $allExamplesSuccess = $false
+        }
+    }
+
+    if ($allExamplesSuccess) {
+        Write-Host "All examples downloaded successfully! You are ready to code." -ForegroundColor Green
+    } else {
+        Write-Host "Some examples failed to download. Please check your connection." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "Skipping examples download." -ForegroundColor Yellow
+}
+
+Write-Host "--------------------------------------"
+Write-Host "🎉 ALL DONE! Your Ultimate Assembly Environment is 100% Ready! 🚀" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
