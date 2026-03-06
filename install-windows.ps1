@@ -1,91 +1,74 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-Set-ExecutionPolicy RemoteSigned -Scope Process -Force -ErrorAction SilentlyContinue
 
 $msysDir = "C:\msys64"
 $pacmanExe = Join-Path $msysDir "usr\bin\pacman.exe"
 $currentDir = Get-Location
 $destination = Join-Path $currentDir "msys2.exe"
+$pathDoneFile = Join-Path $currentDir "add-to-path.txt"
 
-# ----------------------------------------------------------------
-# دالة التحميل المحصنة (نظام المحاولات التلقائية لتفادي أخطاء الشبكة)
-# ----------------------------------------------------------------
-function Download-WithCurl {
-    param(
-        [string]$Url,
-        [string]$OutFile
-    )
-    $curlExe = "C:\Windows\System32\curl.exe"
-    if (-not (Test-Path $curlExe)) { $curlExe = "curl.exe" }
+Write-Host "Checking for existing MSYS2 installation..." -ForegroundColor Cyan
 
-    $maxRetries = 3
-    $retryCount = 0
-    $success = $false
+# 0. Check if MSYS2 is already installed
+if (Test-Path $pacmanExe) {
+    Write-Host "MSYS2 is already installed in $msysDir. Skipping download and installation!" -ForegroundColor Green
+} else {
+    # 1. Download and Install MSYS2
+    if (Test-Path $downloadDoneFile -and (Get-Content $downloadDoneFile -Raw).Trim() -eq "1" -and (Test-Path $destination)) {   
+        Write-Host "MSYS2 installer is already downloaded locally." -ForegroundColor Green
+    } else {
+        Write-Host "Fetching the latest MSYS2 download link from GitHub..." -ForegroundColor Cyan
 
-    while (-not $success -and $retryCount -lt $maxRetries) {
-        Write-Host "Downloading (Attempt $($retryCount + 1)/$maxRetries)..." -ForegroundColor Gray
-        & $curlExe -L -s -o $OutFile $Url
-        
-        if ($LASTEXITCODE -eq 0 -and (Test-Path $OutFile)) {
-            $success = $true
+        # قراءة بيانات آخر إصدار من واجهة برمجة تطبيقات جيت هاب
+        $releaseData = Invoke-RestMethod -Uri "https://api.github.com/repos/msys2/msys2-installer/releases/latest"
+
+        # البحث عن ملف التثبيت بصيغة exe
+        $url = $releaseData.assets | Where-Object { $_.name -match "^msys2-x86_64-\d+\.exe$" } | Select-Object -ExpandProperty browser_download_url
+
+        if (-not $url) {
+            Write-Host "Could not fetch dynamic URL. Using fallback..." -ForegroundColor Yellow
+            $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
+        }
+
+        Write-Host "Latest URL found: $url" -ForegroundColor Green
+        Write-Host "Downloading MSYS2..." -ForegroundColor Cyan
+        Invoke-WebRequest -Uri $url -OutFile $destination
+
+        if (Test-Path $destination) {
+            Write-Host "Download completed." -ForegroundColor Green
+            Set-Content -Path $downloadDoneFile -Value "1"
         } else {
-            $retryCount++
-            if ($retryCount -lt $maxRetries) {
-                Write-Host "Network hiccup! Retrying in 2 seconds..." -ForegroundColor Yellow
-                Start-Sleep -Seconds 2
-            }
+            Write-Host "Download failed." -ForegroundColor Red
+            exit
         }
     }
 
-    if (-not $success) {
-        throw "Curl failed to download file after $maxRetries attempts. Check your internet connection."
-    }
-}
+    # Install MSYS2
+    $answer = Read-Host "Do you want to skip installing MSYS2? (y/n)"
 
-# ==========================================
-# الخطوة 1: تثبيت MSYS2
-# ==========================================
-Write-Host "--------------------------------------"
-Write-Host "Verification: 1. MSYS2 Installation" -ForegroundColor Cyan
-Write-Host "--------------------------------------"
-try {
-    if (Test-Path -Path $msysDir -PathType Container) {
-        Write-Host "MSYS2 folder already exists at $msysDir. Skipping download and installation." -ForegroundColor Green
+    if ($answer.Trim().ToLower() -eq "y") {
+        Write-Host "Skipping MSYS2 installation." -ForegroundColor Yellow
     }
     else {
-        $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
-        Download-WithCurl -Url $url -OutFile $destination
-        Write-Host "Download completed successfully." -ForegroundColor Green
+        Write-Host "Installing MSYS2..." -ForegroundColor Cyan
 
-        $answer = Read-Host "Do you want to skip installing MSYS2? (y/n)"
-        if ($answer.Trim().ToLower() -eq "y") {
-            Write-Host "Skipping MSYS2 installation." -ForegroundColor Yellow
+        Start-Process `
+            -FilePath $destination `
+            -ArgumentList "in --confirm-command --accept-messages --root $msysDir" `
+            -Wait
+
+        # تحقق من نجاح التثبيت
+        if (-not (Test-Path $pacmanExe)) {
+            Write-Host "MSYS2 installation failed. pacman.exe not found." -ForegroundColor Red
+            exit
         }
-        else {
-            Write-Host "Opening MSYS2 installer..." -ForegroundColor Cyan
-            Write-Host "IMPORTANT: Click Next -> Next -> Finish. Keep the default path (C:\msys64)." -ForegroundColor Yellow
-            Write-Host "Waiting for you to finish the installation..." -ForegroundColor Magenta
 
-            Start-Process -FilePath $destination -Wait
-
-            if (-not (Test-Path $pacmanExe)) {
-                throw "MSYS2 installation failed or was cancelled. pacman.exe not found."
-            }
-            Write-Host "MSYS2 installed successfully." -ForegroundColor Green
-        }
+        Write-Host "MSYS2 installed successfully." -ForegroundColor Green
     }
-} catch {
-    Write-Host "ERROR IN STEP 1: $_" -ForegroundColor Red
-    Read-Host "Press Enter to exit..."
-    exit
 }
 
-# ==========================================
-# الخطوة 2: إضافة المسارات لـ PATH
-# ==========================================
-Write-Host "--------------------------------------"
-Write-Host "Verification: 2. Add to PATH" -ForegroundColor Cyan
-Write-Host "--------------------------------------"
-try {
+# 2. Add to PATH
+if (-not (Test-Path $pathDoneFile)) {
+    Write-Host "Adding MSYS2 directories to PATH..." -ForegroundColor Cyan
     $pathsToAdd = @(
         "C:\msys64\usr\bin",
         "C:\msys64\mingw64\bin",
@@ -94,203 +77,256 @@ try {
     )
 
     $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
-    $pathChanged = $false
-
     foreach ($p in $pathsToAdd) {
         if (-not ($currentPath -split ";" | Where-Object { $_ -eq $p })) {
             $currentPath += ";$p"
-            $pathChanged = $true
         }
     }
 
-    if ($pathChanged) {
-        [Environment]::SetEnvironmentVariable("Path", $currentPath, "User")
-        $env:Path = $currentPath 
-        Write-Host "Paths added successfully." -ForegroundColor Green
-    } else {
-        Write-Host "Paths are already configured." -ForegroundColor Green
-    }
-} catch {
-    Write-Host "ERROR IN STEP 2: $_" -ForegroundColor Red
-    Read-Host "Press Enter to exit..."
-    exit
+    # Update Windows permanently
+    [Environment]::SetEnvironmentVariable("Path", $currentPath, "User")
+
+    # Update current PowerShell session just in case
+    $env:Path = $currentPath
+
+    Set-Content -Path $pathDoneFile -Value "1"
+    Write-Host "Paths added successfully." -ForegroundColor Green
+} else {
+    Write-Host "Paths are already added." -ForegroundColor Green
+    $env:Path = [Environment]::GetEnvironmentVariable("Path", "User")
 }
 
-# ==========================================
-# الخطوة 3: تحديث وتثبيت الحزم (بما فيها p7zip)
-# ==========================================
-Write-Host "--------------------------------------"
-Write-Host "Verification: 3. Install Pacman Packages" -ForegroundColor Cyan
-Write-Host "--------------------------------------"
-try {
-    Write-Host "Syncing pacman databases and installing packages..." -ForegroundColor Cyan
-    & $pacmanExe -Sy --noconfirm
-    # تمت إضافة p7zip هنا لتثبيت أداة فك الضغط الخاصة بنا
-    & $pacmanExe -S --needed --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make p7zip
-    & $pacmanExe -S --needed --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
-    Write-Host "Packages installed successfully." -ForegroundColor Green
-} catch {
-    Write-Host "ERROR IN STEP 3: $_" -ForegroundColor Red
-    Read-Host "Press Enter to exit..."
-    exit
+# 3. Update MSYS2 and Install Packages automatically using Absolute Paths
+Write-Host "Syncing pacman databases and installing packages..." -ForegroundColor Cyan
+
+# Update databases first
+& "C:\msys64\usr\bin\pacman.exe" -Sy --noconfirm
+
+# Install all standard packages in one go (أضفنا p7zip هنا)
+& "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make p7zip
+
+# Install UASM with the specific overwrite fix
+& "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
+
+
+# 4. VS Code Configuration Setup (Local or Cloud)
+Write-Host "Setting up VS Code environment..." -ForegroundColor Cyan
+
+$vscodeDir = Join-Path $currentDir ".vscode"
+$localSetupDir = Join-Path $currentDir "install-windows"
+$jsonFiles = @("c_cpp_properties.json", "launch.json", "settings.json", "tasks.json")
+
+# Create .vscode directory if it doesn't exist
+if (-not (Test-Path $vscodeDir)) {
+    New-Item -ItemType Directory -Path $vscodeDir | Out-Null
+    Write-Host "Created .vscode directory." -ForegroundColor Green
 }
 
-# ==========================================
-# الخطوة 4: إعداد ملفات VS Code
-# ==========================================
-Write-Host "--------------------------------------"
-Write-Host "Verification: 4. VS Code Setup" -ForegroundColor Cyan
-Write-Host "--------------------------------------"
-try {
-    $vscodeDir = Join-Path $currentDir ".vscode"
-    $localSetupDir = Join-Path $currentDir "install-windows"
-    $jsonFiles = @("c_cpp_properties.json", "launch.json", "settings.json", "tasks.json")
-
-    if (-not (Test-Path $vscodeDir)) {
-        New-Item -ItemType Directory -Path $vscodeDir -Force | Out-Null
-        Write-Host "Created .vscode directory." -ForegroundColor Green
-    }
-
-    $localFilesComplete = $true
-    if (Test-Path $localSetupDir) {
-        foreach ($file in $jsonFiles) {
-            if (-not (Test-Path (Join-Path $localSetupDir $file))) {
-                $localFilesComplete = $false
-                break
-            }
+# Check if the local folder exists and contains ALL 4 files
+$localFilesComplete = $true
+if (Test-Path $localSetupDir) {
+    foreach ($file in $jsonFiles) {
+        if (-not (Test-Path (Join-Path $localSetupDir $file))) {
+            $localFilesComplete = $false
+            break
         }
-    } else {
-        $localFilesComplete = $false
     }
-
-    if ($localFilesComplete) {
-        Write-Host "Found local VS Code configs. Copying them..." -ForegroundColor Cyan
-        foreach ($file in $jsonFiles) {
-            Copy-Item -Path (Join-Path $localSetupDir $file) -Destination (Join-Path $vscodeDir $file) -Force
-        }
-        Write-Host "Configs copied locally." -ForegroundColor Green
-    } else {
-        Write-Host "Local configs missing. Downloading from GitHub..." -ForegroundColor Yellow
-        $githubBaseUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows/"
-        
-        foreach ($file in $jsonFiles) {
-            $fileUrl = $githubBaseUrl + $file
-            $destPath = Join-Path $vscodeDir $file
-            Download-WithCurl -Url $fileUrl -OutFile $destPath
-        }
-        Write-Host "Configs downloaded successfully." -ForegroundColor Green
-    }
-} catch {
-    Write-Host "ERROR IN STEP 4: $_" -ForegroundColor Red
-    Read-Host "Press Enter to exit..."
-    exit
+} else {
+    $localFilesComplete = $false
 }
 
-# ==========================================
-# الخطوة 5: تحميل وفك ضغط مكتبة Irvine
-# ==========================================
-Write-Host "--------------------------------------"
-Write-Host "Verification: 5. Irvine Library" -ForegroundColor Cyan
-Write-Host "--------------------------------------"
-try {
-    $irvineAnswer = Read-Host "Do you want to download and extract the Irvine library? (y/n)"
-    if ($irvineAnswer.Trim().ToLower() -eq "y") {
-        Write-Host "Downloading Irvine library..." -ForegroundColor Cyan
-        $irvineUrl = "http://www.asmirvine.com/gettingStartedVS2019/Irvine.zip"
-        $irvineZipPath = Join-Path $currentDir "Irvine.zip"
+if ($localFilesComplete) {
+    Write-Host "Found local VS Code configs. Copying them to .vscode..." -ForegroundColor Cyan
+    foreach ($file in $jsonFiles) {
+        Copy-Item -Path (Join-Path $localSetupDir $file) -Destination (Join-Path $vscodeDir $file) -Force
+    }
+    Write-Host "VS Code configs copied successfully." -ForegroundColor Green
+} else {
+    Write-Host "Local configs missing or incomplete. Downloading from GitHub..." -ForegroundColor Yellow
+    $githubBaseUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows/"
 
-        Download-WithCurl -Url $irvineUrl -OutFile $irvineZipPath
-        Write-Host "Extracting files..." -ForegroundColor Cyan
-        
+    foreach ($file in $jsonFiles) {
+        $fileUrl = $githubBaseUrl + $file
+        $destPath = Join-Path $vscodeDir $file
+        Write-Host "Downloading $file..." -ForegroundColor Cyan
+        Invoke-WebRequest -Uri $fileUrl -OutFile $destPath
+    }
+    Write-Host "VS Code configs downloaded successfully." -ForegroundColor Green
+}
+
+# 5. Download and Extract Irvine32 Library
+Write-Host "--------------------------------------"
+$irvineAnswer = Read-Host "Do you want to download and extract the Irvine library? (y/n)"
+if ($irvineAnswer.Trim().ToLower() -eq "y") {
+    Write-Host "Downloading Irvine library..." -ForegroundColor Cyan
+    $irvineUrl = "http://www.asmirvine.com/gettingStartedVS2019/Irvine.zip"
+    $irvineZipPath = Join-Path $currentDir "Irvine.zip"
+
+    try {
+        Invoke-WebRequest -Uri $irvineUrl -OutFile $irvineZipPath
+        Write-Host "Download complete. Extracting files Here..." -ForegroundColor Cyan
+
+        # Extract Here (directly to the current directory)
         Expand-Archive -Path $irvineZipPath -DestinationPath $currentDir -Force
-        
-        Remove-Item -Path $irvineZipPath -Force -ErrorAction SilentlyContinue
+
+        Write-Host "Extraction complete. Cleaning up zip file..." -ForegroundColor Cyan
+        Remove-Item -Path $irvineZipPath -Force
         Write-Host "Irvine library is ready!" -ForegroundColor Green
-    } else {
-        Write-Host "Skipping Irvine library." -ForegroundColor Yellow
+    } catch {
+        Write-Host "Failed to download or extract Irvine library. Error: $_" -ForegroundColor Red
     }
-} catch {
-    Write-Host "ERROR IN STEP 5: $_" -ForegroundColor Red
-    Read-Host "Press Enter to exit..."
-    exit
+} else {
+    Write-Host "Skipping Irvine library download." -ForegroundColor Yellow
 }
 
-# ==========================================
-# الخطوة 6: تحديث مسار launch.json
-# ==========================================
+# 7. Update launch.json with the dynamic current directory
 Write-Host "--------------------------------------"
-Write-Host "Verification: 6. Update launch.json" -ForegroundColor Cyan
-Write-Host "--------------------------------------"
-try {
-    $launchJsonPath = Join-Path $vscodeDir "launch.json"
+Write-Host "Updating VS Code launch.json paths..." -ForegroundColor Cyan
+$launchJsonPath = Join-Path $vscodeDir "launch.json"
 
-    if (Test-Path $launchJsonPath) {
-        $launchContent = Get-Content $launchJsonPath -Raw
-        $forwardSlashDir = $currentDir -replace '\\', '/'
-        $launchContent = $launchContent -ireplace "c:/Users/ahmed/Downloads/asm", $forwardSlashDir
-        
-        Set-Content -Path $launchJsonPath -Value $launchContent -Encoding UTF8
-        Write-Host "launch.json updated successfully with dynamic path." -ForegroundColor Green
-    } else {
-        Write-Host "launch.json not found to update. (Skipping)" -ForegroundColor Yellow
-    }
-} catch {
-    Write-Host "ERROR IN STEP 6: $_" -ForegroundColor Red
-    Read-Host "Press Enter to exit..."
-    exit
+if (Test-Path $launchJsonPath) {
+
+    $launchContent = Get-Content $launchJsonPath -Raw
+
+
+    $forwardSlashDir = $currentDir -replace '\\', '/'
+
+
+    $launchContent = $launchContent -ireplace "c:/Users/ahmed/Downloads/asm", $forwardSlashDir
+
+
+    Set-Content -Path $launchJsonPath -Value $launchContent -Encoding UTF8
+
+    Write-Host "launch.json updated successfully with path: $forwardSlashDir" -ForegroundColor Green
+} else {
+    Write-Host "launch.json not found to update." -ForegroundColor Yellow
 }
 
-# ==========================================
-# الخطوة 7: تحميل برنامج Frhed (وفك ضغطه بأداة MSYS2)
-# ==========================================
+# 8. Verify Installation using Absolute Paths
 Write-Host "--------------------------------------"
-Write-Host "Verification: 7. Frhed Hex Editor" -ForegroundColor Cyan
+Write-Host "Verification:" -ForegroundColor Cyan
+& "C:\msys64\ucrt64\bin\gcc.exe" --version | Select-Object -First 1
+& "C:\msys64\ucrt64\bin\gdb.exe" --version | Select-Object -First 1
+& "C:\msys64\ucrt64\bin\g++.exe" --version | Select-Object -First 1
+& "C:\msys64\usr\bin\make.exe" --version | Select-Object -First 1
+& "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
+Write-Host "Environment Setup Complete! 🚀" -ForegroundColor Green
+
+# ---------------------- 9. Download and Extract Frhed (Final Fixed Version with MSYS2 7z) ----------------------
 Write-Host "--------------------------------------"
-try {
-    $frhedUrl = "https://master.dl.sourceforge.net/project/frhed/3.%20Alpha%20Releases/1.7.1/Frhed-1.7.1-exe.7z?viasf=1"
-    $frhed7zPath = Join-Path $currentDir "Frhed-1.7.1-exe.7z"
-    $frhedExtractDir = $currentDir
+$frhedAnswer = Read-Host "Do you want to download and setup Frhed Hex Editor in C:\? (y/n)"
+
+if ($frhedAnswer.Trim().ToLower() -eq "y") {
+
+    $currentDir = Get-Location
+    $frhedUrl = "https://master.dl.sourceforge.net/project/frhed/3.%20Alpha%20Releases/1.7.1/Frhed-1.7.1-exe.7z?viasf=1"       
+    $frhed7zPath = Join-Path $currentDir "Frhed.7z"
+    $frhedDestFolder = "C:\Frhed-1.7.1-exe"
+
+    # الاعتماد على 7z الخاص بـ MSYS2 بدلاً من نظام الويندوز
+    $msys7zExe = "C:\msys64\usr\bin\7z.exe"
 
     Write-Host "Downloading Frhed hex editor..." -ForegroundColor Cyan
-    Download-WithCurl -Url $frhedUrl -OutFile $frhed7zPath
-    Write-Host "Frhed downloaded." -ForegroundColor Green
+    try {
 
-    # استخدام أداة 7z المدمجة التي حملناها عبر MSYS2
-    $msys7zExe = "C:\msys64\usr\bin\7z.exe"
-    if (-not (Test-Path $msys7zExe)) {
-        Write-Host "MSYS2 7z tool not found! Make sure Step 3 completed successfully." -ForegroundColor Yellow
-    } else {
-        Write-Host "Extracting Frhed using MSYS2's 7z tool..." -ForegroundColor Cyan
-        & "$msys7zExe" x $frhed7zPath "-o$frhedExtractDir" -y | Out-Null
-        Remove-Item -Path $frhed7zPath -Force -ErrorAction SilentlyContinue
-        Write-Host "Frhed extracted successfully." -ForegroundColor Green
+        Invoke-WebRequest -Uri $frhedUrl -OutFile $frhed7zPath -UseBasicParsing
+        Write-Host "Download complete." -ForegroundColor Green
+
+        Write-Host "Extracting Frhed to $frhedDestFolder..." -ForegroundColor Cyan
+
+        if (-not (Test-Path $frhedDestFolder)) {
+            New-Item -ItemType Directory -Path $frhedDestFolder -Force | Out-Null
+        }
+
+        # التأكد من وجود أداة فك الضغط في MSYS2
+        if (Test-Path $msys7zExe) {
+            & "$msys7zExe" x "$frhed7zPath" "-o$frhedDestFolder" -y | Out-Null
+        } else {
+             Write-Host "WARNING: MSYS2 7z not found. Falling back to default 7z if available..." -ForegroundColor Yellow
+             & 7z x "$frhed7zPath" "-o$frhedDestFolder" -y | Out-Null
+        }
+
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Frhed setup successfully in $frhedDestFolder" -ForegroundColor Green
+        } else {
+            Write-Host "Extraction failed. Check if 7z is installed correctly in MSYS2." -ForegroundColor Red
+        }
+
+        if (Test-Path $frhed7zPath) { Remove-Item -Path $frhed7zPath -Force }
+
+    } catch {
+        Write-Host "An error occurred during Frhed setup: $_" -ForegroundColor Red
     }
-} catch {
-    Write-Host "ERROR IN STEP 7: $_" -ForegroundColor Red
-    Read-Host "Press Enter to exit..."
-    exit
+} else {
+    Write-Host "Skipping Frhed setup." -ForegroundColor Yellow
 }
 
-# ==========================================
-# الخطوة 8: الاختبار النهائي والأدوات (Verification)
-# ==========================================
 Write-Host "--------------------------------------"
-Write-Host "Verification: 8. Final Tool Check" -ForegroundColor Cyan
+Write-Host "All tasks finished successfully! 🏁" -ForegroundColor Magenta
+
+# ---------------------- 10. Add Frhed to PATH and Create Alias ----------------------
 Write-Host "--------------------------------------"
-try {
-    Write-Host "Checking installed tools versions..." -ForegroundColor Yellow
-    & "C:\msys64\ucrt64\bin\gcc.exe" --version | Select-Object -First 1
-    & "C:\msys64\ucrt64\bin\gdb.exe" --version | Select-Object -First 1
-    & "C:\msys64\ucrt64\bin\g++.exe" --version | Select-Object -First 1
-    & "C:\msys64\usr\bin\make.exe" --version | Select-Object -First 1
-    & "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
-    
-    Write-Host "======================================" -ForegroundColor Green
-    Write-Host "🎉 ALL DONE! Environment Setup Complete! 🚀" -ForegroundColor Green
-    Write-Host "======================================" -ForegroundColor Green
-} catch {
-    Write-Host "ERROR IN FINAL CHECK: Some tools might not be in PATH yet." -ForegroundColor Red
+Write-Host "Configuring PATH and PowerShell Alias for Frhed..." -ForegroundColor Cyan
+
+
+$frhedPathsToAdd = @(
+    "C:\Frhed-1.7.1-exe",
+    "C:\Frhed-1.7.1-exe\Frhed-1.7.1-exe"
+)
+
+$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+$pathModified = $false
+
+foreach ($p in $frhedPathsToAdd) {
+    if (-not ($currentPath -split ";" | Where-Object { $_ -eq $p })) {
+        $currentPath += ";$p"
+        $pathModified = $true
+    }
 }
 
-Write-Host "`nScript execution finished."
-Read-Host "Press Enter to exit safely..."
+if ($pathModified) {
+    [Environment]::SetEnvironmentVariable("Path", $currentPath, "User")
+    $env:Path = $currentPath
+    Write-Host "Frhed paths added to User PATH successfully." -ForegroundColor Green
+} else {
+    Write-Host "Frhed paths are already in the PATH." -ForegroundColor Green
+}
+
+
+$profilePath = $PROFILE
+
+
+if (-not (Test-Path (Split-Path $profilePath))) {
+    New-Item -Type Directory -Path (Split-Path $profilePath) -Force | Out-Null
+}
+
+
+if (-not (Test-Path $profilePath)) {
+    New-Item -Type File -Path $profilePath -Force | Out-Null
+}
+
+$aliasName = "ghex"
+$exePath = "C:\Frhed-1.7.1-exe\Frhed-1.7.1-exe\Frhed.exe"
+
+
+$aliasContent = "`nfunction $aliasName { & `"$exePath`" `$args }"
+
+$profileContent = ""
+if (Test-Path $profilePath) {
+    $profileContent = Get-Content $profilePath -Raw
+}
+
+
+if (-not $profileContent -or $profileContent -notmatch "function $aliasName") {
+    Add-Content -Path $profilePath -Value $aliasContent -Encoding UTF8
+    Write-Host "Alias '$aliasName' mapped to Frhed successfully in PowerShell Profile." -ForegroundColor Green
+
+
+    Invoke-Expression $aliasContent
+} else {
+    Write-Host "Alias '$aliasName' already exists in PowerShell Profile." -ForegroundColor Green
+}
+
+Write-Host "--------------------------------------"
+Write-Host "Step 10 completed! You can now use 'ghex' from any terminal." -ForegroundColor Magenta
