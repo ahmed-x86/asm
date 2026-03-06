@@ -96,19 +96,26 @@ if (-not (Test-Path $pathDoneFile)) {
     $env:Path = [Environment]::GetEnvironmentVariable("Path", "User")
 }
 
-# 3. Update MSYS2 and Install Packages automatically using Absolute Paths
-Write-Host "Syncing pacman databases and installing packages..." -ForegroundColor Cyan
+# 3. Update MSYS2 and Install Packages using Absolute Paths
+Write-Host "--------------------------------------"
+$installPackagesAnswer = Read-Host "Do you want to install the required MSYS2 packages (gcc, gdb, nasm, make, uasm)? (y/n)"
 
-# Update databases first
-& "C:\msys64\usr\bin\pacman.exe" -Sy --noconfirm
+if ($installPackagesAnswer.Trim().ToLower() -eq "y") {
+    Write-Host "Syncing pacman databases and installing packages..." -ForegroundColor Cyan
 
-# Install all standard packages in one go (أضفنا p7zip هنا)
-& "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make p7zip
+    # Update databases first
+    & "C:\msys64\usr\bin\pacman.exe" -Sy --noconfirm
 
-# Install UASM with the specific overwrite fix
-& "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
+    # Install all standard packages in one go (أضفنا p7zip هنا)
+    & "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make p7zip
 
-
+    # Install UASM with the specific overwrite fix
+    & "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
+    
+    Write-Host "Packages installed successfully!" -ForegroundColor Green
+} else {
+    Write-Host "You already have the packages installed. Skipping to the next step..." -ForegroundColor Yellow
+}
 # 4. VS Code Configuration Setup (Local or Cloud)
 Write-Host "Setting up VS Code environment..." -ForegroundColor Cyan
 
