@@ -191,5 +191,38 @@ else
 fi
 
 echo "------------------------------------------"
+echo "Step 5: Downloading ASM Examples..."
+echo "------------------------------------------"
+
+read -p "Do you want to download example Assembly files? (y/n): " download_examples
+
+if [[ "$download_examples" =~ ^[Yy]$ ]]; then
+    example_urls=(
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin32.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin64.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/hi_irvine.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/main_win32_irvine32.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/main_win32_std.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/main_win64_std.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/hi.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bylinux32.asm"
+    )
+
+    for url in "${example_urls[@]}"; do
+        file_name=$(basename "$url")
+        echo -e " -> Fetching \033[1;36m$file_name\033[0m via curl..."
+        curl -fsSL -o "$file_name" "$url"
+    done
+    echo "Examples downloaded successfully!"
+else
+    echo "Skipping example files download."
+fi
+
+echo "------------------------------------------"
+echo -e "\033[1;35m🎉 ALL DONE! Your Ultimate Assembly Environment is 100% Ready! 🚀\033[0m"
+echo "------------------------------------------"
+
+
+echo "------------------------------------------"
 echo "Setup finished successfully! Happy Hacking."
 echo "------------------------------------------"
