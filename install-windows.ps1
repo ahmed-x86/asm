@@ -134,12 +134,16 @@ if (Test-Path $exePath) {
 Write-Host "--------------------------------------"
 $downloadExamples = Read-Host "Do you want to download example Assembly files? (y/n)"
 if ($downloadExamples.Trim().ToLower() -eq "y") {
-example_urls=(
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_start.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_main.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_start.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_main.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_start.asm"
+    $exampleUrls = @(
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_start.asm",
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_main.asm",
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_start.asm",
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_main.asm",
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_start.asm",
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_main.asm",
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_start.asm",
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_main.asm",
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_start.asm",
         "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_main.asm"
     )
     foreach ($url in $exampleUrls) {
