@@ -198,17 +198,18 @@ read -p "Do you want to download example Assembly files? (y/n): " download_examp
 
 if [[ "$download_examples" =~ ^[Yy]$ ]]; then
     example_urls=(
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin32.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin64.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/hi_irvine.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/main_win32_irvine32.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/main_win32_std.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/main_win64_std.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/hi.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bylinux32.asm"
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_start.asm"
-    )
-
+            "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_start.asm"
+            "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_main.asm"
+            "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_start.asm"
+            "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_main.asm"
+            "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_start.asm"
+            "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_main.asm"
+            "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_start.asm"
+            "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_main.asm"
+            "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_start.asm"
+            "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_main.asm"
+        )
+        
     for url in "${example_urls[@]}"; do
         file_name=$(basename "$url")
         echo -e " -> Fetching \033[1;36m$file_name\033[0m via curl..."
