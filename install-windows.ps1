@@ -212,56 +212,70 @@ Write-Host "Verification:" -ForegroundColor Cyan
 & "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
 Write-Host "Environment Setup Complete! 🚀" -ForegroundColor Green
 
-# ---------------------- 9. Download and Extract Frhed (Final Fixed Version with MSYS2 bash) ----------------------
+# ---------------------- 9. Download Frhed (Directly from GitHub - The Miracle Way) ----------------------
 Write-Host "--------------------------------------"
-$frhedAnswer = Read-Host "Do you want to download and setup Frhed Hex Editor in C:\? (y/n)"
+$frhedAnswer = Read-Host "Do you want to download and setup Frhed Hex Editor? (y/n)"
 
 if ($frhedAnswer.Trim().ToLower() -eq "y") {
-
-    $currentDir = Get-Location
-    $frhedUrl = "https://master.dl.sourceforge.net/project/frhed/3.%20Alpha%20Releases/1.7.1/Frhed-1.7.1-exe.7z?viasf=1"       
-    $frhed7zPath = Join-Path $currentDir "Frhed.7z"
+    
     $frhedDestFolder = "C:\Frhed-1.7.1-exe"
+    Write-Host "Setting up Frhed directory structure in $frhedDestFolder..." -ForegroundColor Cyan
 
-    Write-Host "Downloading Frhed hex editor..." -ForegroundColor Cyan
-    try {
+    # 1. إنشاء المجلدات المطلوبة
+    $dirsToCreate = @(
+        $frhedDestFolder,
+        "$frhedDestFolder\Docs",
+        "$frhedDestFolder\Languages"
+    )
 
-        Invoke-WebRequest -Uri $frhedUrl -OutFile $frhed7zPath -UseBasicParsing
-        Write-Host "Download complete." -ForegroundColor Green
-
-        Write-Host "Extracting Frhed to $frhedDestFolder..." -ForegroundColor Cyan
-
-        if (-not (Test-Path $frhedDestFolder)) {
-            New-Item -ItemType Directory -Path $frhedDestFolder -Force | Out-Null
+    foreach ($dir in $dirsToCreate) {
+        if (-not (Test-Path $dir)) {
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
         }
-
-        # الحل الجذري: تشغيل بيئة Bash الخاصة بـ MSYS2 لتمرير أمر فك الضغط بداخلها
-        $msysBash = "C:\msys64\usr\bin\bash.exe"
-
-        if (Test-Path $msysBash) {
-            Write-Host "Using MSYS2 bash environment for extraction..." -ForegroundColor Gray
-            
-            # تحويل مسارات الويندوز إلى مسارات يفهمها لينكس/MSYS2
-            $linux7zPath = $frhed7zPath -replace '\\', '/'
-            $linuxDestFolder = $frhedDestFolder -replace '\\', '/'
-            
-            # تنفيذ الأمر داخل bash
-            & "$msysBash" -c "7z x '$linux7zPath' -o'$linuxDestFolder' -y" | Out-Null
-            
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "Frhed setup successfully in $frhedDestFolder" -ForegroundColor Green
-            } else {
-                Write-Host "Extraction failed inside bash. Exit code: $LASTEXITCODE" -ForegroundColor Red
-            }
-        } else {
-             Write-Host "WARNING: MSYS2 bash not found. Cannot extract .7z file natively." -ForegroundColor Red
-        }
-
-        if (Test-Path $frhed7zPath) { Remove-Item -Path $frhed7zPath -Force }
-
-    } catch {
-        Write-Host "An error occurred during Frhed setup: $_" -ForegroundColor Red
     }
+
+    # 2. الرابط الأساسي للمجلد على المستودع الخاص بك
+    $githubBaseUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/main/Frhed_Folder/Frhed-1.7.1-exe/"
+
+    # 3. قائمة الملفات التي سيتم تحميلها
+    $filesToDownload = @(
+        "Frhed.exe",
+        "heksedit.dll",
+        "RAWIO32.dll",
+        "Docs/ChangeLog.txt",
+        "Docs/Contributors.txt",
+        "Docs/Frhed.chm",
+        "Docs/GPL.txt",
+        "Docs/History.txt",
+        "Languages/de.po",
+        "Languages/fr.po",
+        "Languages/heksedit.lng",
+        "Languages/nl.po"
+    )
+
+    Write-Host "Downloading Frhed files directly from GitHub..." -ForegroundColor Cyan
+    $allFilesSuccess = $true
+
+    # 4. تحميل الملفات وترتيبها
+    foreach ($file in $filesToDownload) {
+        $fileUrl = $githubBaseUrl + $file
+        $destPath = Join-Path $frhedDestFolder ($file -replace '/', '\')
+
+        Write-Host " -> Fetching $file..." -ForegroundColor Gray
+        try {
+            Invoke-WebRequest -Uri $fileUrl -OutFile $destPath -UseBasicParsing
+        } catch {
+            Write-Host "    [X] Error downloading: $file" -ForegroundColor Red
+            $allFilesSuccess = $false
+        }
+    }
+
+    if ($allFilesSuccess) {
+        Write-Host "Frhed installed natively and successfully!" -ForegroundColor Green
+    } else {
+        Write-Host "Setup finished, but some files failed to download. Check your connection." -ForegroundColor Yellow
+    }
+
 } else {
     Write-Host "Skipping Frhed setup." -ForegroundColor Yellow
 }
