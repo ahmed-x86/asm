@@ -221,7 +221,7 @@ if ($frhedAnswer.Trim().ToLower() -eq "y") {
     $frhedDestFolder = "C:\Frhed-1.7.1-exe"
     Write-Host "Setting up Frhed directory structure in $frhedDestFolder..." -ForegroundColor Cyan
 
-    # 1. إنشاء المجلدات المطلوبة
+    
     $dirsToCreate = @(
         $frhedDestFolder,
         "$frhedDestFolder\Docs",
@@ -234,10 +234,10 @@ if ($frhedAnswer.Trim().ToLower() -eq "y") {
         }
     }
 
-    # 2. الرابط الأساسي للمجلد على المستودع الخاص بك
+    
     $githubBaseUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/main/Frhed_Folder/Frhed-1.7.1-exe/"
 
-    # 3. قائمة الملفات التي سيتم تحميلها
+    
     $filesToDownload = @(
         "Frhed.exe",
         "heksedit.dll",
