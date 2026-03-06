@@ -285,8 +285,7 @@ Write-Host "Configuring PATH and PowerShell Alias for Frhed..." -ForegroundColor
 
 
 $frhedPathsToAdd = @(
-    "C:\Frhed-1.7.1-exe",
-    "C:\Frhed-1.7.1-exe\Frhed-1.7.1-exe"
+    "C:\Frhed-1.7.1-exe"
 )
 
 $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -307,22 +306,19 @@ if ($pathModified) {
     Write-Host "Frhed paths are already in the PATH." -ForegroundColor Green
 }
 
-
 $profilePath = $PROFILE
-
 
 if (-not (Test-Path (Split-Path $profilePath))) {
     New-Item -Type Directory -Path (Split-Path $profilePath) -Force | Out-Null
 }
-
 
 if (-not (Test-Path $profilePath)) {
     New-Item -Type File -Path $profilePath -Force | Out-Null
 }
 
 $aliasName = "ghex"
-$exePath = "C:\Frhed-1.7.1-exe\Frhed-1.7.1-exe\Frhed.exe"
 
+$exePath = "C:\Frhed-1.7.1-exe\Frhed.exe"
 
 $aliasContent = "`nfunction $aliasName { & `"$exePath`" `$args }"
 
@@ -331,11 +327,9 @@ if (Test-Path $profilePath) {
     $profileContent = Get-Content $profilePath -Raw
 }
 
-
 if (-not $profileContent -or $profileContent -notmatch "function $aliasName") {
     Add-Content -Path $profilePath -Value $aliasContent -Encoding UTF8
     Write-Host "Alias '$aliasName' mapped to Frhed successfully in PowerShell Profile." -ForegroundColor Green
-
 
     Invoke-Expression $aliasContent
 } else {
