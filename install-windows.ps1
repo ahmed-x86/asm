@@ -134,13 +134,13 @@ if (Test-Path $exePath) {
 Write-Host "--------------------------------------"
 $downloadExamples = Read-Host "Do you want to download example Assembly files? (y/n)"
 if ($downloadExamples.Trim().ToLower() -eq "y") {
-    $exampleUrls = @(
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin32.asm",             # 1. Win32 Standalone
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin64.asm",             # 2. Win64 Standalone
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/hi_irvine.asm",           # 3. Win32 (Irvine Edition)
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/main_win32_irvine32.asm", # 4. Win32 Irvine (Custom main)
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/main_win32_std.asm",      # 5. Win32 Standalone (Custom main)
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/main_win64_std.asm"       # 6. Win64 Standalone (Custom main)
+example_urls=(
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_start.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_main.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_start.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_main.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_start.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_main.asm"
     )
     foreach ($url in $exampleUrls) {
         $fileName = $url.Split('/')[-1]
