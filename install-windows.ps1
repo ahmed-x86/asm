@@ -1,5 +1,9 @@
+# Set Execution Policy to bypass for the current process to ensure the script runs without errors
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
+# Initial path configurations
 $msysDir = "C:\msys64"
 $pacmanExe = Join-Path $msysDir "usr\bin\pacman.exe"
 $currentDir = Get-Location
@@ -8,383 +12,138 @@ $pathDoneFile = Join-Path $currentDir "add-to-path.txt"
 
 Write-Host "Checking for existing MSYS2 installation..." -ForegroundColor Cyan
 
-# 0. Check if MSYS2 is already installed
+# Step 0: Check if MSYS2 is already installed
 if (Test-Path $pacmanExe) {
     Write-Host "MSYS2 is already installed in $msysDir. Skipping download and installation!" -ForegroundColor Green
 } else {
-    # 1. Download and Install MSYS2
-    if (Test-Path $downloadDoneFile -and (Get-Content $downloadDoneFile -Raw).Trim() -eq "1" -and (Test-Path $destination)) {   
-        Write-Host "MSYS2 installer is already downloaded locally." -ForegroundColor Green
-    } else {
-        Write-Host "Fetching the latest MSYS2 download link from GitHub..." -ForegroundColor Cyan
+    # Step 1: Download and Install MSYS2
+    Write-Host "Fetching the latest MSYS2 download link from GitHub..." -ForegroundColor Cyan
+    $releaseData = Invoke-RestMethod -Uri "https://api.github.com/repos/msys2/msys2-installer/releases/latest"
+    $url = $releaseData.assets | Where-Object { $_.name -match "^msys2-x86_64-\d+\.exe$" } | Select-Object -ExpandProperty browser_download_url
 
-        # قراءة بيانات آخر إصدار من واجهة برمجة تطبيقات جيت هاب
-        $releaseData = Invoke-RestMethod -Uri "https://api.github.com/repos/msys2/msys2-installer/releases/latest"
-
-        # البحث عن ملف التثبيت بصيغة exe
-        $url = $releaseData.assets | Where-Object { $_.name -match "^msys2-x86_64-\d+\.exe$" } | Select-Object -ExpandProperty browser_download_url
-
-        if (-not $url) {
-            Write-Host "Could not fetch dynamic URL. Using fallback..." -ForegroundColor Yellow
-            $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
-        }
-
-        Write-Host "Latest URL found: $url" -ForegroundColor Green
-        Write-Host "Downloading MSYS2..." -ForegroundColor Cyan
-        Invoke-WebRequest -Uri $url -OutFile $destination
-
-        if (Test-Path $destination) {
-            Write-Host "Download completed." -ForegroundColor Green
-            Set-Content -Path $downloadDoneFile -Value "1"
-        } else {
-            Write-Host "Download failed." -ForegroundColor Red
-            exit
-        }
+    if (-not $url) {
+        $url = "https://repo.msys2.org/distrib/msys2-x86_64-latest.exe"
     }
 
-    # Install MSYS2
-    $answer = Read-Host "Do you want to skip installing MSYS2? (y/n)"
+    Write-Host "Downloading MSYS2..." -ForegroundColor Cyan
+    Invoke-WebRequest -Uri $url -OutFile $destination
 
+    $answer = Read-Host "Do you want to install MSYS2 now? (y/n)"
     if ($answer.Trim().ToLower() -eq "y") {
-        Write-Host "Skipping MSYS2 installation." -ForegroundColor Yellow
-    }
-    else {
-        Write-Host "Installing MSYS2..." -ForegroundColor Cyan
-
-        Start-Process `
-            -FilePath $destination `
-            -ArgumentList "in --confirm-command --accept-messages --root $msysDir" `
-            -Wait
-
-        # تحقق من نجاح التثبيت
-        if (-not (Test-Path $pacmanExe)) {
-            Write-Host "MSYS2 installation failed. pacman.exe not found." -ForegroundColor Red
-            exit
-        }
-
-        Write-Host "MSYS2 installed successfully." -ForegroundColor Green
+        Write-Host "Installing MSYS2... please wait for the wizard to finish." -ForegroundColor Cyan
+        Start-Process -FilePath $destination -ArgumentList "in --confirm-command --accept-messages --root $msysDir" -Wait
     }
 }
 
-# 2. Add to PATH
+# Step 2: Add MSYS2 Binaries to System PATH
 if (-not (Test-Path $pathDoneFile)) {
     Write-Host "Adding MSYS2 directories to PATH..." -ForegroundColor Cyan
-    $pathsToAdd = @(
-        "C:\msys64\usr\bin",
-        "C:\msys64\mingw64\bin",
-        "C:\msys64\mingw32\bin",
-        "C:\msys64\ucrt64\bin"
-    )
-
+    $pathsToAdd = @("C:\msys64\usr\bin", "C:\msys64\mingw64\bin", "C:\msys64\mingw32\bin", "C:\msys64\ucrt64\bin")
     $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
     foreach ($p in $pathsToAdd) {
-        if (-not ($currentPath -split ";" | Where-Object { $_ -eq $p })) {
-            $currentPath += ";$p"
-        }
+        if (-not ($currentPath -split ";" | Where-Object { $_ -eq $p })) { $currentPath += ";$p" }
     }
-
-    # Update Windows permanently
     [Environment]::SetEnvironmentVariable("Path", $currentPath, "User")
-
-    # Update current PowerShell session just in case
     $env:Path = $currentPath
-
     Set-Content -Path $pathDoneFile -Value "1"
     Write-Host "Paths added successfully." -ForegroundColor Green
-} else {
-    Write-Host "Paths are already added." -ForegroundColor Green
-    $env:Path = [Environment]::GetEnvironmentVariable("Path", "User")
 }
 
-# 3. Update MSYS2 and Install Packages using Absolute Paths
+# Step 3: Update Pacman and Install Assembly Tools
 Write-Host "--------------------------------------"
-$installPackagesAnswer = Read-Host "Do you want to install the required MSYS2 packages (gcc, gdb, nasm, make, uasm)? (y/n)"
-
+$installPackagesAnswer = Read-Host "Do you want to install required MSYS2 packages (gcc, gdb, nasm, make, uasm)? (y/n)"
 if ($installPackagesAnswer.Trim().ToLower() -eq "y") {
     Write-Host "Syncing pacman databases and installing packages..." -ForegroundColor Cyan
-
-    # Update databases first
-    & "C:\msys64\usr\bin\pacman.exe" -Sy --noconfirm
-
-    # Install all standard packages in one go (أضفنا p7zip هنا)
-    & "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make p7zip
-
-    # Install UASM with the specific overwrite fix
-    & "C:\msys64\usr\bin\pacman.exe" -S --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
-    
+    & $pacmanExe -Sy --noconfirm
+    & $pacmanExe -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make p7zip
+    & $pacmanExe -S --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
     Write-Host "Packages installed successfully!" -ForegroundColor Green
-} else {
-    Write-Host "You already have the packages installed. Skipping to the next step..." -ForegroundColor Yellow
 }
-# 4. VS Code Configuration Setup (Local or Cloud)
+
+# Step 4: VS Code Environment Configuration
 Write-Host "Setting up VS Code environment..." -ForegroundColor Cyan
-
 $vscodeDir = Join-Path $currentDir ".vscode"
-$localSetupDir = Join-Path $currentDir "install-windows"
+if (-not (Test-Path $vscodeDir)) { New-Item -ItemType Directory -Path $vscodeDir | Out-Null }
 $jsonFiles = @("c_cpp_properties.json", "launch.json", "settings.json", "tasks.json")
+$githubBaseUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows/"
 
-# Create .vscode directory if it doesn't exist
-if (-not (Test-Path $vscodeDir)) {
-    New-Item -ItemType Directory -Path $vscodeDir | Out-Null
-    Write-Host "Created .vscode directory." -ForegroundColor Green
+foreach ($file in $jsonFiles) {
+    Write-Host "Downloading $file..." -ForegroundColor Cyan
+    Invoke-WebRequest -Uri ($githubBaseUrl + $file) -OutFile (Join-Path $vscodeDir $file)
 }
 
-# Check if the local folder exists and contains ALL 4 files
-$localFilesComplete = $true
-if (Test-Path $localSetupDir) {
-    foreach ($file in $jsonFiles) {
-        if (-not (Test-Path (Join-Path $localSetupDir $file))) {
-            $localFilesComplete = $false
-            break
-        }
-    }
-} else {
-    $localFilesComplete = $false
-}
-
-if ($localFilesComplete) {
-    Write-Host "Found local VS Code configs. Copying them to .vscode..." -ForegroundColor Cyan
-    foreach ($file in $jsonFiles) {
-        Copy-Item -Path (Join-Path $localSetupDir $file) -Destination (Join-Path $vscodeDir $file) -Force
-    }
-    Write-Host "VS Code configs copied successfully." -ForegroundColor Green
-} else {
-    Write-Host "Local configs missing or incomplete. Downloading from GitHub..." -ForegroundColor Yellow
-    $githubBaseUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows/"
-
-    foreach ($file in $jsonFiles) {
-        $fileUrl = $githubBaseUrl + $file
-        $destPath = Join-Path $vscodeDir $file
-        Write-Host "Downloading $file..." -ForegroundColor Cyan
-        Invoke-WebRequest -Uri $fileUrl -OutFile $destPath
-    }
-    Write-Host "VS Code configs downloaded successfully." -ForegroundColor Green
-}
-
-# 5. Download and Extract Irvine32 Library
+# Step 5: Download and Extract Irvine32 Library
 Write-Host "--------------------------------------"
 $irvineAnswer = Read-Host "Do you want to download and extract the Irvine library? (y/n)"
 if ($irvineAnswer.Trim().ToLower() -eq "y") {
-    Write-Host "Downloading Irvine library..." -ForegroundColor Cyan
     $irvineUrl = "http://www.asmirvine.com/gettingStartedVS2019/Irvine.zip"
-    $irvineZipPath = Join-Path $currentDir "Irvine.zip"
-
-    try {
-        Invoke-WebRequest -Uri $irvineUrl -OutFile $irvineZipPath
-        Write-Host "Download complete. Extracting files Here..." -ForegroundColor Cyan
-
-        # Extract Here (directly to the current directory)
-        Expand-Archive -Path $irvineZipPath -DestinationPath $currentDir -Force
-
-        Write-Host "Extraction complete. Cleaning up zip file..." -ForegroundColor Cyan
-        Remove-Item -Path $irvineZipPath -Force
-        Write-Host "Irvine library is ready!" -ForegroundColor Green
-    } catch {
-        Write-Host "Failed to download or extract Irvine library. Error: $_" -ForegroundColor Red
-    }
-} else {
-    Write-Host "Skipping Irvine library download." -ForegroundColor Yellow
+    Invoke-WebRequest -Uri $irvineUrl -OutFile (Join-Path $currentDir "Irvine.zip")
+    Expand-Archive -Path (Join-Path $currentDir "Irvine.zip") -DestinationPath $currentDir -Force
+    Remove-Item -Path (Join-Path $currentDir "Irvine.zip") -Force
+    Write-Host "Irvine library is ready!" -ForegroundColor Green
 }
 
-# 7. Update launch.json with the dynamic current directory
-Write-Host "--------------------------------------"
-Write-Host "Updating VS Code launch.json paths..." -ForegroundColor Cyan
+# Step 7: Update launch.json dynamic paths
 $launchJsonPath = Join-Path $vscodeDir "launch.json"
-
 if (Test-Path $launchJsonPath) {
-
     $launchContent = Get-Content $launchJsonPath -Raw
-
-
     $forwardSlashDir = $currentDir -replace '\\', '/'
-
-
     $launchContent = $launchContent -ireplace "c:/Users/ahmed/Downloads/asm", $forwardSlashDir
-
-
     Set-Content -Path $launchJsonPath -Value $launchContent -Encoding UTF8
-
-    Write-Host "launch.json updated successfully with path: $forwardSlashDir" -ForegroundColor Green
-} else {
-    Write-Host "launch.json not found to update." -ForegroundColor Yellow
 }
 
-# 8. Verify Installation using Absolute Paths
+# Step 8: Verify Installation of Main Tools
 Write-Host "--------------------------------------"
 Write-Host "Verification:" -ForegroundColor Cyan
 & "C:\msys64\ucrt64\bin\gcc.exe" --version | Select-Object -First 1
-& "C:\msys64\ucrt64\bin\gdb.exe" --version | Select-Object -First 1
-& "C:\msys64\ucrt64\bin\g++.exe" --version | Select-Object -First 1
-& "C:\msys64\usr\bin\make.exe" --version | Select-Object -First 1
 & "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
 Write-Host "Environment Setup Complete! 🚀" -ForegroundColor Green
 
-# ---------------------- 9. Download Frhed (Directly from GitHub - The Miracle Way) ----------------------
+# Step 9: Download Frhed Hex Editor (Directly from GitHub)
 Write-Host "--------------------------------------"
 $frhedAnswer = Read-Host "Do you want to download and setup Frhed Hex Editor? (y/n)"
-
 if ($frhedAnswer.Trim().ToLower() -eq "y") {
-    
     $frhedDestFolder = "C:\Frhed-1.7.1-exe"
-    Write-Host "Setting up Frhed directory structure in $frhedDestFolder..." -ForegroundColor Cyan
+    $dirsToCreate = @($frhedDestFolder, "$frhedDestFolder\Docs", "$frhedDestFolder\Languages")
+    foreach ($dir in $dirsToCreate) { if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null } }
 
-    
-    $dirsToCreate = @(
-        $frhedDestFolder,
-        "$frhedDestFolder\Docs",
-        "$frhedDestFolder\Languages"
-    )
+    $githubFrhedUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/main/Frhed_Folder/Frhed-1.7.1-exe/"
+    $filesToDownload = @("Frhed.exe", "heksedit.dll", "RAWIO32.dll", "Docs/ChangeLog.txt", "Docs/Contributors.txt", "Docs/Frhed.chm", "Docs/GPL.txt", "Docs/History.txt", "Languages/de.po", "Languages/fr.po", "Languages/heksedit.lng", "Languages/nl.po")
 
-    foreach ($dir in $dirsToCreate) {
-        if (-not (Test-Path $dir)) {
-            New-Item -ItemType Directory -Path $dir -Force | Out-Null
-        }
-    }
-
-    
-    $githubBaseUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/main/Frhed_Folder/Frhed-1.7.1-exe/"
-
-    
-    $filesToDownload = @(
-        "Frhed.exe",
-        "heksedit.dll",
-        "RAWIO32.dll",
-        "Docs/ChangeLog.txt",
-        "Docs/Contributors.txt",
-        "Docs/Frhed.chm",
-        "Docs/GPL.txt",
-        "Docs/History.txt",
-        "Languages/de.po",
-        "Languages/fr.po",
-        "Languages/heksedit.lng",
-        "Languages/nl.po"
-    )
-
-    Write-Host "Downloading Frhed files directly from GitHub..." -ForegroundColor Cyan
-    $allFilesSuccess = $true
-
-    # 4. تحميل الملفات وترتيبها
     foreach ($file in $filesToDownload) {
-        $fileUrl = $githubBaseUrl + $file
-        $destPath = Join-Path $frhedDestFolder ($file -replace '/', '\')
-
         Write-Host " -> Fetching $file..." -ForegroundColor Gray
-        try {
-            Invoke-WebRequest -Uri $fileUrl -OutFile $destPath -UseBasicParsing
-        } catch {
-            Write-Host "    [X] Error downloading: $file" -ForegroundColor Red
-            $allFilesSuccess = $false
-        }
+        Invoke-WebRequest -Uri ($githubFrhedUrl + $file) -OutFile (Join-Path $frhedDestFolder ($file -replace '/', '\')) -UseBasicParsing
     }
-
-    if ($allFilesSuccess) {
-        Write-Host "Frhed installed natively and successfully!" -ForegroundColor Green
-    } else {
-        Write-Host "Setup finished, but some files failed to download. Check your connection." -ForegroundColor Yellow
-    }
-
-} else {
-    Write-Host "Skipping Frhed setup." -ForegroundColor Yellow
-}
-# ---------------------- 10. Add Frhed to PATH and Create Alias ----------------------
-Write-Host "--------------------------------------"
-Write-Host "Configuring PATH and PowerShell Alias for Frhed..." -ForegroundColor Cyan
-
-
-$frhedPathsToAdd = @(
-    "C:\Frhed-1.7.1-exe"
-)
-
-$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
-$pathModified = $false
-
-foreach ($p in $frhedPathsToAdd) {
-    if (-not ($currentPath -split ";" | Where-Object { $_ -eq $p })) {
-        $currentPath += ";$p"
-        $pathModified = $true
-    }
+    Write-Host "Frhed installed successfully!" -ForegroundColor Green
 }
 
-if ($pathModified) {
-    [Environment]::SetEnvironmentVariable("Path", $currentPath, "User")
-    $env:Path = $currentPath
-    Write-Host "Frhed paths added to User PATH successfully." -ForegroundColor Green
-} else {
-    Write-Host "Frhed paths are already in the PATH." -ForegroundColor Green
-}
-
-$profilePath = $PROFILE
-
-if (-not (Test-Path (Split-Path $profilePath))) {
-    New-Item -Type Directory -Path (Split-Path $profilePath) -Force | Out-Null
-}
-
-if (-not (Test-Path $profilePath)) {
-    New-Item -Type File -Path $profilePath -Force | Out-Null
-}
-
-$aliasName = "ghex"
-
+# Step 10: Configure PowerShell Alias for Frhed
 $exePath = "C:\Frhed-1.7.1-exe\Frhed.exe"
-
-$aliasContent = "`nfunction $aliasName { & `"$exePath`" `$args }"
-
-$profileContent = ""
-if (Test-Path $profilePath) {
-    $profileContent = Get-Content $profilePath -Raw
+if (Test-Path $exePath) {
+    $profilePath = $PROFILE
+    if (-not (Test-Path (Split-Path $profilePath))) { New-Item -Type Directory -Path (Split-Path $profilePath) -Force | Out-Null }
+    $aliasContent = "`nfunction ghex { & `"$exePath`" `$args }"
+    if (-not (Test-Path $profilePath) -or (Get-Content $profilePath -Raw) -notmatch "function ghex") {
+        Add-Content -Path $profilePath -Value $aliasContent -Encoding UTF8
+        Invoke-Expression $aliasContent
+    }
+    Write-Host "Step 10 completed! 'ghex' alias is now active." -ForegroundColor Magenta
 }
 
-if (-not $profileContent -or $profileContent -notmatch "function $aliasName") {
-    Add-Content -Path $profilePath -Value $aliasContent -Encoding UTF8
-    Write-Host "Alias '$aliasName' mapped to Frhed successfully in PowerShell Profile." -ForegroundColor Green
-
-    Invoke-Expression $aliasContent
-} else {
-    Write-Host "Alias '$aliasName' already exists in PowerShell Profile." -ForegroundColor Green
-}
-
+# Step 11: Download ASM Examples using Native curl.exe
 Write-Host "--------------------------------------"
-Write-Host "Step 10 completed! You can now use 'ghex' from any terminal." -ForegroundColor Magenta
-
-# ---------------------- 11. Download Examples ----------------------
-Write-Host "--------------------------------------"
-$downloadExamples = Read-Host "Do you want to download example Assembly files (bywin32, bywin64, hi_irvine)? (y/n)"
-
+$downloadExamples = Read-Host "Do you want to download example Assembly files? (y/n)"
 if ($downloadExamples.Trim().ToLower() -eq "y") {
-    Write-Host "Downloading example files to the current directory..." -ForegroundColor Cyan
-
-    # روابط الأمثلة
     $exampleUrls = @(
         "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin32.asm",
         "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin64.asm",
         "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/hi_irvine.asm"
     )
-
-    $allExamplesSuccess = $true
-
-    # تحميل كل ملف في المسار الحالي
     foreach ($url in $exampleUrls) {
-        # استخراج اسم الملف من الرابط
         $fileName = $url.Split('/')[-1]
-        $destPath = Join-Path $currentDir $fileName
-        
-        Write-Host " -> Fetching $fileName..." -ForegroundColor Gray
-        try {
-            Invoke-WebRequest -Uri $url -OutFile $destPath -UseBasicParsing
-            Write-Host "    [OK] Downloaded: $fileName" -ForegroundColor Green
-        } catch {
-            Write-Host "    [X] Error downloading: $fileName" -ForegroundColor Red
-            $allExamplesSuccess = $false
-        }
+        Write-Host " -> Fetching $fileName via curl..." -ForegroundColor Gray
+        & curl.exe -L -o (Join-Path $currentDir $fileName) $url
     }
-
-    if ($allExamplesSuccess) {
-        Write-Host "All examples downloaded successfully! You are ready to code." -ForegroundColor Green
-    } else {
-        Write-Host "Some examples failed to download. Please check your connection." -ForegroundColor Yellow
-    }
-} else {
-    Write-Host "Skipping examples download." -ForegroundColor Yellow
 }
 
 Write-Host "--------------------------------------"
