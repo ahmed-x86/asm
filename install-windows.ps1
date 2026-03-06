@@ -212,7 +212,7 @@ Write-Host "Verification:" -ForegroundColor Cyan
 & "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
 Write-Host "Environment Setup Complete! 🚀" -ForegroundColor Green
 
-# ---------------------- 9. Download and Extract Frhed (Final Fixed Version with MSYS2 7z) ----------------------
+# ---------------------- 9. Download and Extract Frhed (Final Fixed Version with MSYS2 bash) ----------------------
 Write-Host "--------------------------------------"
 $frhedAnswer = Read-Host "Do you want to download and setup Frhed Hex Editor in C:\? (y/n)"
 
@@ -222,9 +222,6 @@ if ($frhedAnswer.Trim().ToLower() -eq "y") {
     $frhedUrl = "https://master.dl.sourceforge.net/project/frhed/3.%20Alpha%20Releases/1.7.1/Frhed-1.7.1-exe.7z?viasf=1"       
     $frhed7zPath = Join-Path $currentDir "Frhed.7z"
     $frhedDestFolder = "C:\Frhed-1.7.1-exe"
-
-    # الاعتماد على 7z الخاص بـ MSYS2 بدلاً من نظام الويندوز
-    $msys7zExe = "C:\msys64\usr\bin\7z.exe"
 
     Write-Host "Downloading Frhed hex editor..." -ForegroundColor Cyan
     try {
@@ -238,19 +235,26 @@ if ($frhedAnswer.Trim().ToLower() -eq "y") {
             New-Item -ItemType Directory -Path $frhedDestFolder -Force | Out-Null
         }
 
-        # التأكد من وجود أداة فك الضغط في MSYS2
-        if (Test-Path $msys7zExe) {
-            & "$msys7zExe" x "$frhed7zPath" "-o$frhedDestFolder" -y | Out-Null
-        } else {
-             Write-Host "WARNING: MSYS2 7z not found. Falling back to default 7z if available..." -ForegroundColor Yellow
-             & 7z x "$frhed7zPath" "-o$frhedDestFolder" -y | Out-Null
-        }
+        # الحل الجذري: تشغيل بيئة Bash الخاصة بـ MSYS2 لتمرير أمر فك الضغط بداخلها
+        $msysBash = "C:\msys64\usr\bin\bash.exe"
 
-
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "Frhed setup successfully in $frhedDestFolder" -ForegroundColor Green
+        if (Test-Path $msysBash) {
+            Write-Host "Using MSYS2 bash environment for extraction..." -ForegroundColor Gray
+            
+            # تحويل مسارات الويندوز إلى مسارات يفهمها لينكس/MSYS2
+            $linux7zPath = $frhed7zPath -replace '\\', '/'
+            $linuxDestFolder = $frhedDestFolder -replace '\\', '/'
+            
+            # تنفيذ الأمر داخل bash
+            & "$msysBash" -c "7z x '$linux7zPath' -o'$linuxDestFolder' -y" | Out-Null
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "Frhed setup successfully in $frhedDestFolder" -ForegroundColor Green
+            } else {
+                Write-Host "Extraction failed inside bash. Exit code: $LASTEXITCODE" -ForegroundColor Red
+            }
         } else {
-            Write-Host "Extraction failed. Check if 7z is installed correctly in MSYS2." -ForegroundColor Red
+             Write-Host "WARNING: MSYS2 bash not found. Cannot extract .7z file natively." -ForegroundColor Red
         }
 
         if (Test-Path $frhed7zPath) { Remove-Item -Path $frhed7zPath -Force }
@@ -261,10 +265,6 @@ if ($frhedAnswer.Trim().ToLower() -eq "y") {
 } else {
     Write-Host "Skipping Frhed setup." -ForegroundColor Yellow
 }
-
-Write-Host "--------------------------------------"
-Write-Host "All tasks finished successfully! 🏁" -ForegroundColor Magenta
-
 # ---------------------- 10. Add Frhed to PATH and Create Alias ----------------------
 Write-Host "--------------------------------------"
 Write-Host "Configuring PATH and PowerShell Alias for Frhed..." -ForegroundColor Cyan
