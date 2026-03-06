@@ -135,9 +135,9 @@ Write-Host "--------------------------------------"
 $downloadExamples = Read-Host "Do you want to download example Assembly files? (y/n)"
 if ($downloadExamples.Trim().ToLower() -eq "y") {
     $exampleUrls = @(
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin32.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin64.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/hi_irvine.asm"
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin32.asm", #win32
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/bywin64.asm", #win64
+        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/hi_irvine.asm" #win32 (Irvine Edition)
     )
     foreach ($url in $exampleUrls) {
         $fileName = $url.Split('/')[-1]
