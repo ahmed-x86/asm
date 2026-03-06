@@ -2,34 +2,62 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "1. Build & Run: Linux 64-bit",
+            "label": "1. Build & Run: Linux64 Native (Standard _start)",
             "type": "shell",
             "command": "nasm -f elf64 \"${file}\" -o \"${fileDirname}/${fileBasenameNoExtension}.o\" && ld \"${fileDirname}/${fileBasenameNoExtension}.o\" -o \"${fileDirname}/${fileBasenameNoExtension}\" && \"${fileDirname}/${fileBasenameNoExtension}\"",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
-        },
-        {
-            "label": "2. Build & Run: Win32 Irvine (Clean)",
-            "type": "shell",
-            "command": "uasm -q -coff -I./irvine \"${file}\" -Fo\"${fileDirname}/${fileBasenameNoExtension}.o\" && i686-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.o\" ./irvine/Irvine32.lib -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostdlib -lkernel32 -luser32 -w -Wl,-e_main -Wl,--subsystem,console -Wl,--enable-stdcall-fixup && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "presentation": { "reveal": "always", "panel": "shared", "clear": true }
         },
         {
-            "label": "3. Build & Run: Win32 Standalone",
+            "label": "2. Build & Run: Linux64 Native (Custom main)",
+            "type": "shell",
+            "command": "nasm -f elf64 \"${file}\" -o \"${fileDirname}/${fileBasenameNoExtension}.o\" && ld -e main \"${fileDirname}/${fileBasenameNoExtension}.o\" -o \"${fileDirname}/${fileBasenameNoExtension}\" && \"${fileDirname}/${fileBasenameNoExtension}\"",
+            "group": "build",
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "3. Build & Run: Win32 Irvine (Standard)",
+            "type": "shell",
+            "command": "uasm -q -coff -I./irvine \"${file}\" -Fo\"${fileDirname}/${fileBasenameNoExtension}.o\" && i686-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.o\" ./irvine/Irvine32.lib -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostdlib -lkernel32 -luser32 -w -Wl,--subsystem,console && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
+            "group": "build",
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "4. Build & Run: Win32 Standalone (Standard)",
             "type": "shell",
             "command": "nasm -f win32 \"${file}\" -o \"${fileDirname}/${fileBasenameNoExtension}.obj\" && i686-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.obj\" -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostartfiles -lkernel32 -luser32 && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "presentation": { "reveal": "always", "panel": "shared", "clear": true }
         },
         {
-            "label": "4. Build & Run: Win64 Standalone",
+            "label": "5. Build & Run: Win64 Standalone (Standard)",
             "type": "shell",
             "command": "nasm -f win64 \"${file}\" -o \"${fileDirname}/${fileBasenameNoExtension}.obj\" && x86_64-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.obj\" -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostartfiles -lkernel32 -luser32 && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
             "group": "build",
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "6. Build & Run: Win32 Irvine (Custom main)",
+            "type": "shell",
+            "command": "uasm -q -coff -I./irvine \"${file}\" -Fo\"${fileDirname}/${fileBasenameNoExtension}.o\" && i686-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.o\" ./irvine/Irvine32.lib -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostdlib -lkernel32 -luser32 -w -Wl,-e_main -Wl,--subsystem,console -Wl,--enable-stdcall-fixup && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
+            "group": "build",
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "7. Build & Run: Win32 Standalone (Custom main)",
+            "type": "shell",
+            "command": "nasm -f win32 \"${file}\" -o \"${fileDirname}/${fileBasenameNoExtension}.obj\" && i686-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.obj\" -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostartfiles -lkernel32 -luser32 -Wl,-e_main && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
+            "group": "build",
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "8. Build & Run: Win64 Standalone (Custom main)",
+            "type": "shell",
+            "command": "nasm -f win64 \"${file}\" -o \"${fileDirname}/${fileBasenameNoExtension}.obj\" && x86_64-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.obj\" -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostartfiles -lkernel32 -luser32 -Wl,-emain && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "presentation": { "reveal": "always", "panel": "shared", "clear": true }
         }
     ]
