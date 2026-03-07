@@ -1,7 +1,11 @@
+
+
 # Assembly Development Environment 🚀
 
 ![Windows 10](https://img.shields.io/badge/Windows_10-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 ![Windows 11](https://img.shields.io/badge/Windows_11-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Windows 7](https://img.shields.io/badge/Windows_7-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+
 ![Arch Linux](https://img.shields.io/badge/Arch_Linux-1793D1?style=for-the-badge&logo=arch-linux&logoColor=white)
 ![Manjaro](https://img.shields.io/badge/Manjaro-35BF5C?style=for-the-badge&logo=manjaro&logoColor=white)
 ![CachyOS](https://img.shields.io/badge/CachyOS-0080FF?style=for-the-badge&logo=arch-linux&logoColor=white)
@@ -22,64 +26,86 @@
 ![openSUSE](https://img.shields.io/badge/openSUSE-73BA48?style=for-the-badge&logo=opensuse&logoColor=white)
 ![Alpine Linux](https://img.shields.io/badge/Alpine_Linux-0D597F?style=for-the-badge&logo=alpine-linux&logoColor=white)
 
+
 ### An all-in-one repository designed to kickstart your Assembly (ASM) development. This environment provides out-of-the-box support for Linux x64 and Windows (x86/x64), featuring pre-configured VS Code settings for a seamless workflow.
+
+---
+
 ## 🛠️ Quick Installation
 
 Choose your weapon (Operating System) and run the corresponding command to configure your environment immediately:
-# 🐧 Linux (One-Line Installer)
+
+## 🐧 Linux (One-Line Installer)
 
 Supports Arch, Debian/Ubuntu, Fedora, and their derivatives.
-
 
 ```bash
 bash <(curl -sSL https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-linux.sh)
 ```
 
-### 🪟 Windows (PowerShell Installer)
+### 🪟 Windows 10 / 11 (PowerShell Installer)
 
-Optimized for Windows 10 & 11 via PowerShell.
-PowerShell
-```ps
+Optimized for modern Windows environments.
+
+```powershell
 irm https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows.ps1 | iex
 ```
-# 🏗️ Manual Setup (Local)
+
+### 🏛️ Windows 7 (Legacy Support)
+
+Dedicated script for Windows 7 compatibility.
+
+```powershell
+irm https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows7.ps1 | iex
+```
+
+---
+
+## 🏗️ Manual Setup (Local)
 
 If you prefer to clone the repository and run the scripts locally:
 
-# For Linux:
-```Bash
+**For Linux:**
+
+```bash
 git clone https://github.com/ahmed-x86/asm.git
-cp -r asm/. .
+cd asm
 chmod +x install-linux.sh
 ./install-linux.sh
+
 ```
-## For Windows:
-```PowerShell
+
+**For Windows (All Versions):**
+
+```powershell
 git clone https://github.com/ahmed-x86/asm.git
-xcopy /E /I /Y asm\* .
+cd asm
+# For Win 10/11:
 .\install-windows.ps1
+# For Win 7:
+.\install-windows7.ps1
 ```
-# ✨ Key Features
 
-Dual-Platform Support: Native installers for both Windows and Linux, ensuring your dev environment is consistent everywhere.
 
-VS Code Integration: Pre-configured tasks.json and launch.json allow you to build and debug your code with a single shortcut `(Ctrl+Shift+P)`.
 
-Smart Dependency Management:
+---
 
-On Linux: Automatically detects your package manager `(pacman, apt, dnf)` and installs `NASM`, `GCC`, and `GDB`.
+## ✨ Key Features
 
-On Windows: Sets up NASM and required build tools automatically.
+* **Dual-Platform Support:** Native installers for both Windows and Linux, ensuring your dev environment is consistent everywhere.
+* **VS Code Integration:** Pre-configured `tasks.json` and `launch.json` allow you to build and debug your code with a single shortcut (`Ctrl+Shift+B`).
+* **Smart Dependency Management:**
+* **On Linux:** Automatically detects your package manager (`pacman`, `apt`, `dnf`) and installs `NASM`, `GCC`, and `GDB`.
+* **On Windows:** Sets up NASM and required build tools automatically.
 
-Cross-Compilation: Ready-to-use toolchains to compile and test Windows binaries directly from Linux using Wine and MinGW.
 
-Note for Arch Users: Because "I use Arch btw" shouldn't mean spending three hours on config. We've got you covered. 😎
+* **Legacy Support:** Special installer for **Windows 7** to ensure assembly development isn't limited by OS version.
+* **Cross-Compilation:** Ready-to-use toolchains to compile and test Windows binaries directly from Linux using Wine and MinGW.
 
-💡 What's New?
+> **Note for Arch Users:** Because "I use Arch btw" shouldn't mean spending three hours on config. We've got you covered. 😎
 
-Windows Native Support: Added a dedicated PowerShell script for one-click setup on Windows.
+---
 
-Improved Toolchain: Better handling of environment variables for NASM on both platforms.
 # i use arch btw
 
 ---
