@@ -84,6 +84,9 @@ if ($irvineAnswer.Trim().ToLower() -eq "y") {
 }
 
 # Step 7: Update launch.json dynamic paths
+Write-Host "--------------------------------------"
+Write-Host "Step 7: Update launch.json dynamic paths" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
 $launchJsonPath = Join-Path $vscodeDir "launch.json"
 if (Test-Path $launchJsonPath) {
     $launchContent = Get-Content $launchJsonPath -Raw
