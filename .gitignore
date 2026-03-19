@@ -33,3 +33,4 @@ tasks.err
 test.asm
 test.exe
 test.o
+test2.asm
