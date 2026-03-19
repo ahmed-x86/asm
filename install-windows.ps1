@@ -74,6 +74,8 @@ foreach ($file in $jsonFiles) {
 
 # Step 5: Download and Extract Irvine32 Library
 Write-Host "--------------------------------------"
+Write-Host "Step 5: Download and Extract Irvine32 Library" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
 $irvineAnswer = Read-Host "Do you want to download and extract the Irvine library? (y/n)"
 if ($irvineAnswer.Trim().ToLower() -eq "y") {
     $irvineUrl = "http://www.asmirvine.com/gettingStartedVS2019/Irvine.zip"
