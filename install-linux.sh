@@ -221,6 +221,32 @@ else
 fi
 
 echo "------------------------------------------"
+echo "Step 6: Select Your Preferred Editor"
+echo "------------------------------------------"
+echo "Which editor are you using? (This helps in installing extensions later)"
+echo "1) VS Code"
+echo "2) VS Codium"
+echo "3) Cursor"
+echo "4) Trae"
+echo "5) Windsurf"
+echo "6) Google Antigravity"
+
+read -p "Select your editor (1-6): " editor_choice
+
+case $editor_choice in
+    1) EDITOR_CMD="code" ;;
+    2) EDITOR_CMD="codium" ;;
+    3) EDITOR_CMD="cursor" ;;
+    4) EDITOR_CMD="trae" ;;
+    5) EDITOR_CMD="windsurf" ;;
+    6) EDITOR_CMD="antigravity" ;;
+    *) EDITOR_CMD="code" ;;
+esac
+
+echo -e "Target editor set to: \033[1;32m$EDITOR_CMD\033[0m"
+
+
+echo "------------------------------------------"
 echo -e "\033[1;35m🎉 ALL DONE! Your Ultimate Assembly Environment is 100% Ready! 🚀\033[0m"
 echo "------------------------------------------"
 
