@@ -22,3 +22,4 @@ readme.txt
 Uninstall.exe
 linux32_main
 linux32_main.asm.o
+linux32_main.asm.out
