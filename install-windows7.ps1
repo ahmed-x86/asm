@@ -173,6 +173,7 @@ if ($downloadExamples.Trim().ToLower() -eq "y") {
     }
 }
 
+#final (write "ALL DONE! Assembly Environment Ready! ")
 Write-Host "--------------------------------------"
 Write-Host "ALL DONE! Assembly Environment Ready! " -ForegroundColor Magenta
 Write-Host "--------------------------------------"
