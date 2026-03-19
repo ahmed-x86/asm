@@ -127,7 +127,7 @@ if ($frhedAnswer.Trim().ToLower() -eq "y") {
     foreach ($dir in $dirsToCreate) { if (-not (Test-Path $dir)) { [Void](New-Item -ItemType Directory -Path $dir -Force) } }
 
     $githubFrhedUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/main/Frhed_Folder/Frhed-1.7.1-exe/"
-    $filesToDownload = @("Frhed.exe", "heksedit.dll", "RAWIO32.dll", "Docs/ChangeLog.txt", "Docs/Contributors.txt", "Docs/Frhed.chm", "Docs/GPL.txt", "Docs/History.txt", "Languages/de.po", "Languages/fr.po", "Languages/heksedit.lng", "Languages/nl.po")
+    $filesToDownload = @("Frhed.exe", "heksedit.dll", "RAWIO32.dll", "Docs/ChangeLog.txt", "Docs/Contributors.txt", "Docs/Frhed.chm", "Docs/GPL.txt", "Languages/de.po", "Languages/fr.po", "Languages/heksedit.lng", "Languages/nl.po")
 
     foreach ($file in $filesToDownload) {
         $cleanName = $file -replace '/', '\'
