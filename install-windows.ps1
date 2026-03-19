@@ -76,7 +76,7 @@ foreach ($file in $jsonFiles) {
 Write-Host "--------------------------------------"
 Write-Host "Step 5: Download and Extract Irvine32 Library" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
-$irvineAnswer = Read-Host "Do you want to download and extract the Irvine library? (y/n)"
+$irvineAnswer = Read-Host "Do you want to download the Irvine Library? It is approximately 24 MB in size. (y/n): "
 if ($irvineAnswer.Trim().ToLower() -eq "y") {
     $irvineUrl = "http://www.asmirvine.com/gettingStartedVS2019/Irvine.zip"
     Invoke-WebRequest -Uri $irvineUrl -OutFile (Join-Path $currentDir "Irvine.zip")
