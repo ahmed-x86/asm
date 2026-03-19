@@ -1,5 +1,11 @@
 #!/bin/bash
 
+
+echo "------------------------------------------"
+echo "Step 1:download files"
+echo "------------------------------------------"
+
+
 mkdir -p .vscode
 
 files=("c_cpp_properties.json" "launch.json" "settings.json" "tasks.json")
@@ -26,11 +32,22 @@ else
     done
 fi
 
+# Pre-step: Essential Fix for Alpine Linux
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" == "alpine" ]; then
+        echo "Alpine Linux detected. Installing GNU sed for compatibility..."
+        sudo apk add --no-cache sed
+    fi
+fi
+
+
+
 echo "------------------------------------------"
-echo "VS Code configuration complete!"
+echo "Step 2: Detecting Linux Distribution..."
 echo "------------------------------------------"
 
-echo "Step 2: Detecting Linux Distribution..."
+
 
 if [ -f /etc/os-release ]; then
     . /etc/os-release
