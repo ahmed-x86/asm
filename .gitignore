@@ -27,3 +27,4 @@ linux32_main.o
 linux64_main
 linux64_main.o
 task1.asm
+task1.exe
