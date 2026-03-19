@@ -3,6 +3,10 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
+Write-Host "--------------------------------------"
+Write-Host "Step 1: Download and Install MSYS2" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
+
 # Initial path configurations
 $msysDir = "C:\msys64"
 $pacmanExe = Join-Path $msysDir "usr\bin\pacman.exe"
