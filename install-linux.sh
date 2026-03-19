@@ -317,5 +317,5 @@ echo -e "\033[1;35m🎉 ALL DONE! Your Ultimate Assembly Environment is 100% Rea
 echo "------------------------------------------"
 
 echo "------------------------------------------"
-echo "Setup finished successfully! Happy Hacking."
+echo "Setup finished successfully!"
 echo "------------------------------------------"
