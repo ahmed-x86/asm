@@ -132,6 +132,8 @@ if (Test-Path $exePath) {
 
 # Step 11: Download ASM Examples using Native curl.exe
 Write-Host "--------------------------------------"
+Write-Host "# Step 11: Download ASM Examples using Native curl.exe" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
 $downloadExamples = Read-Host "Do you want to download example Assembly files? (y/n)"
 if ($downloadExamples.Trim().ToLower() -eq "y") {
     $exampleUrls = @(
