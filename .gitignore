@@ -26,3 +26,4 @@ linux32_main.asm.out
 linux32_main.o
 linux64_main
 linux64_main.o
+task1.asm
