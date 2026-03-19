@@ -37,7 +37,7 @@ Choose your weapon (Operating System) and run the corresponding command to confi
 
 ## 🐧 Linux (One-Line Installer)
 
-Supports Arch, Debian/Ubuntu, Fedora, and their derivatives.
+Supports Arch, Debian/Ubuntu, Fedora, Alpine, openSUSE and void.
 
 ```bash
 bash <(curl -sSL https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-linux.sh)
