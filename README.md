@@ -101,6 +101,23 @@ cd asm
 
 * **Legacy Support:** Special installer for **Windows 7** to ensure assembly development isn't limited by OS version.
 * **Cross-Compilation:** Ready-to-use toolchains to compile and test Windows binaries directly from Linux using Wine and MinGW.
+* **Supported Editors: The installer will automatically set up Extensions (Syntax Highlighting & Error Lens) for: VS Code, VSCodium, Cursor, Trae, Windsurf, and Google Antigravity.
+## 🧠 Smart Engine Features
+* **Editor Agnostic:** Automatically detects your IDE (**VS Code, VSCodium, Cursor, Trae, Windsurf, or Google Antigravity**).
+* **Universal Package Tracking:** Detects if your editor is installed via **Native Package Manager, Snap, or Flatpak** and configures it accordingly.
+* **Auto-Path Patching:** Dynamically updates `launch.json` and `tasks.json` based on your current OS username and directory path. No manual editing required!
+* **Alpine Compatibility:** Includes a dedicated pre-step to fix `sed` compatibility on Alpine Linux.
+
+---
+
+## 🎭 Final Note
+*  [!IMPORTANT]
+*  This project was built to prove that "Understanding Linux" isn't about talking, it's about building solutions that work on **9+ distributions** with a single click. 
+ 
+- `echo -e "\033[1;35m فيه حمار قال اني مابفهمش لينكس.. عايز اقولك شوف السكربت ده يا حمار بشري\033[0m"`
+ 
+ **Stay Hard, Keep Coding. 🚀**
+
 
 > **Note for Arch Users:** Because "I use Arch btw" shouldn't mean spending three hours on config. We've got you covered. 😎
 
