@@ -100,6 +100,7 @@ Write-Host "Verification:" -ForegroundColor Cyan
 & "C:\msys64\ucrt64\bin\gcc.exe" --version | Select-Object -First 1
 & "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
 & "C:\msys64\mingw64\bin\uasm.exe" --version | Select-Object -First 1
+& "C:\msys64\mingw64\bin\make.exe" --version | Select-Object -First 1
 Write-Host "Environment Setup Complete! 🚀" -ForegroundColor Green
 
 # Step 9: Download Frhed Hex Editor (Directly from GitHub)
