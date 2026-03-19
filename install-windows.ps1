@@ -36,6 +36,9 @@ if (Test-Path $pacmanExe) {
 }
 
 # Step 2: Add MSYS2 Binaries to System PATH
+Write-Host "--------------------------------------"
+Write-Host "Step 2: Add MSYS2 Binaries to System PATH" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
 if (-not (Test-Path $pathDoneFile)) {
     Write-Host "Adding MSYS2 directories to PATH..." -ForegroundColor Cyan
     $pathsToAdd = @("C:\msys64\usr\bin", "C:\msys64\mingw64\bin", "C:\msys64\mingw32\bin", "C:\msys64\ucrt64\bin")
