@@ -61,6 +61,9 @@ if ($installPackagesAnswer.Trim().ToLower() -eq "y") {
 }
 
 # Step 4: VS Code Environment Configuration
+Write-Host "--------------------------------------"
+Write-Host "Step 4: VS Code Environment Configuration" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
 Write-Host "Setting up VS Code environment..." -ForegroundColor Cyan
 $vscodeDir = Join-Path $currentDir ".vscode"
 if (-not (Test-Path $vscodeDir)) { New-Item -ItemType Directory -Path $vscodeDir | Out-Null }
