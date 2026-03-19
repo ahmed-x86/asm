@@ -29,3 +29,4 @@ linux64_main.o
 task1.asm
 task1.exe
 task1.o
+tasks.err
