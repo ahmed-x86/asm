@@ -155,7 +155,7 @@ else
 fi
 
 echo "------------------------------------------"
-echo "install packages complete"
+echo "step 3:install packages complete"
 echo "------------------------------------------"
 
 echo "Step 3: Downloading Irvine Library..."
