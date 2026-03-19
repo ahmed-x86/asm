@@ -155,10 +155,10 @@ else
 fi
 
 echo "------------------------------------------"
-echo "step 3:install packages complete"
+echo "Step 3: Downloading Irvine Library..."
 echo "------------------------------------------"
 
-echo "Step 3: Downloading Irvine Library..."
+
 read -p "Do you want to download the Irvine Library? It is approximately 24 MB in size. (y/n): " download_irvine
 
 if [[ "$download_irvine" =~ ^[Yy]$ ]]; then
