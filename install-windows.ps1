@@ -51,7 +51,7 @@ if (-not (Test-Path $pathDoneFile)) {
 
 # Step 3: Update Pacman and Install Assembly Tools
 Write-Host "--------------------------------------"
-Write-Host "Step 5: Download and Extract Irvine32 Library" -ForegroundColor Magenta
+Write-Host "Step 3: Update Pacman and Install Assembly Tools" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
 $installPackagesAnswer = Read-Host "Do you want to install required MSYS2 packages (gcc, gdb, nasm, make, uasm)? (y/n)"
 if ($installPackagesAnswer.Trim().ToLower() -eq "y") {
