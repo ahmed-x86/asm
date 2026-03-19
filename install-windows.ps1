@@ -118,6 +118,9 @@ if ($frhedAnswer.Trim().ToLower() -eq "y") {
 }
 
 # Step 10: Configure PowerShell Alias for Frhed
+Write-Host "--------------------------------------"
+Write-Host "tep 10: Configure PowerShell Alias for Frhed" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
 $exePath = "C:\Frhed-1.7.1-exe\Frhed.exe"
 if (Test-Path $exePath) {
     $profilePath = $PROFILE
