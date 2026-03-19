@@ -238,9 +238,9 @@ else
 fi
 
 echo "------------------------------------------"
-echo "Step 6: Select Your Editor & Install Extensions"
+echo "Step 6: Smart Editor Detection & Extension Setup"
 echo "------------------------------------------"
-echo "Which editor are you using? (To install Syntax & Error-checking extensions)"
+echo "Which editor are you using?"
 echo "1) VS Code"
 echo "2) VS Codium"
 echo "3) Cursor"
@@ -251,32 +251,64 @@ echo "6) Google Antigravity"
 read -p "Select your editor (1-6): " editor_choice
 
 case $editor_choice in
-    1) EDITOR_CMD="code" ;;
-    2) EDITOR_CMD="codium" ;;
-    3) EDITOR_CMD="cursor" ;;
-    4) EDITOR_CMD="trae" ;;
-    5) EDITOR_CMD="windsurf" ;;
-    6) EDITOR_CMD="antigravity" ;;
-    *) EDITOR_CMD="code" ;;
+    1) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ;;
+    2) EDITOR_CMD="codium" ; PKG_NAME="vscodium-bin" ; DEB_RPM="codium" ;;
+    3) EDITOR_CMD="cursor" ; PKG_NAME="cursor-bin" ; DEB_RPM="cursor" ;;
+    4) EDITOR_CMD="trae" ; PKG_NAME="trae-bin" ; DEB_RPM="trae" ;;
+    5) EDITOR_CMD="windsurf" ; PKG_NAME="windsurf-bin" ; DEB_RPM="windsurf" ;;
+    6) EDITOR_CMD="antigravity" ; PKG_NAME="google-antigravity-bin" ; DEB_RPM="antigravity" ;;
+    *) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ;;
 esac
 
-echo -e "Target editor set to: \033[1;32m$EDITOR_CMD\033[0m"
+
+FLATPAK_ID="com.visualstudio.code" 
+
+FOUND=false
 
 
-read -p "Do you want to install Assembly extensions (Colors & Error-checking)? (y/n): " install_ext
+if command -v $EDITOR_CMD &> /dev/null; then
+    echo -e "\033[1;32mFound $EDITOR_CMD installed via Package Manager! ✅\033[0m"
+    FOUND=true
 
-if [[ "$install_ext" =~ ^[Yy]$ ]]; then
-    if command -v $EDITOR_CMD &> /dev/null; then
-        echo "Installing extensions for $EDITOR_CMD..."
-        
+elif command -v snap &> /dev/null && snap list | grep -q "^$EDITOR_CMD"; then
+    echo -e "\033[1;32mFound $EDITOR_CMD installed via Snap! ✅\033[0m"
+    EDITOR_CMD="snap run $EDITOR_CMD"
+    FOUND=true
+
+elif command -v flatpak &> /dev/null && flatpak list | grep -q "$EDITOR_CMD"; then
+    echo -e "\033[1;32mFound $EDITOR_CMD installed via Flatpak! ✅\033[0m"
+    
+    ACTUAL_ID=$(flatpak list --columns=application | grep "$EDITOR_CMD" | head -n 1)
+    EDITOR_CMD="flatpak run $ACTUAL_ID"
+    FOUND=true
+fi
+
+if [ "$FOUND" = true ]; then
+    read -p "Do you want to install Assembly extensions for $EDITOR_CMD? (y/n): " install_ext
+    if [[ "$install_ext" =~ ^[Yy]$ ]]; then
+        echo "Installing extensions..."
         $EDITOR_CMD --install-extension 13xforever.language-x86-64-assembly --force
         $EDITOR_CMD --install-extension doinkythederp.nasm-language-support --force
         $EDITOR_CMD --install-extension usernamehw.errorlens --force
-        echo -e "\033[1;32mExtensions ready! Highlighting and Error-markers active. ✅\033[0m"
-    else
-        echo -e "\033[1;31mWarning:\033[0m '$EDITOR_CMD' not found in PATH. Skipping extensions."
+        echo -e "\033[1;32mExtensions setup complete! ✨\033[0m"
+    fi
+else
+    echo -e "\033[1;31m$EDITOR_CMD is NOT found on your system.\033[0m"
+    read -p "Would you like me to suggest the installation command for $OS_ID? (y/n): " suggest_install
+    if [[ "$suggest_install" =~ ^[Yy]$ ]]; then
+        case $OS_ID in
+            arch|manjaro|endeavouros|cachyos)
+                echo -e "Run: \033[1;33myay -S $PKG_NAME\033[0m" ;;
+            debian|ubuntu|mint|zorin)
+                echo -e "Run: \033[1;33msudo apt install $DEB_RPM\033[0m (or download .deb from official site)" ;;
+            fedora)
+                echo -e "Run: \033[1;33msudo dnf install $DEB_RPM\033[0m" ;;
+            *)
+                echo "Please visit the official website to install $EDITOR_CMD on $OS_ID." ;;
+        esac
     fi
 fi
+
 
 
 
