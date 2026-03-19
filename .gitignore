@@ -32,3 +32,4 @@ task1.o
 tasks.err
 test.asm
 test.exe
+test.o
