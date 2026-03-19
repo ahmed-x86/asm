@@ -94,6 +94,8 @@ if (Test-Path $launchJsonPath) {
 
 # Step 8: Verify Installation of Main Tools
 Write-Host "--------------------------------------"
+Write-Host "Step 8: Verify Installation of Main Tools" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
 Write-Host "Verification:" -ForegroundColor Cyan
 & "C:\msys64\ucrt64\bin\gcc.exe" --version | Select-Object -First 1
 & "C:\msys64\mingw64\bin\nasm.exe" --version | Select-Object -First 1
