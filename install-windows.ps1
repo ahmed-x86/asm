@@ -101,6 +101,8 @@ Write-Host "Environment Setup Complete! 🚀" -ForegroundColor Green
 
 # Step 9: Download Frhed Hex Editor (Directly from GitHub)
 Write-Host "--------------------------------------"
+Write-Host "Step 9: Download Frhed Hex Editor (Directly from GitHub)" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
 $frhedAnswer = Read-Host "Do you want to download and setup Frhed Hex Editor? (y/n)"
 if ($frhedAnswer.Trim().ToLower() -eq "y") {
     $frhedDestFolder = "C:\Frhed-1.7.1-exe"
