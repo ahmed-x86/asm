@@ -97,6 +97,34 @@ if ($irvineAnswer.Trim().ToLower() -eq "y") {
     Write-Host "Irvine library is ready!" -ForegroundColor Green
 }
 
+# Step 6: Identify Target Editor for Extensions
+Write-Host "--------------------------------------"
+Write-Host "Step 6: Select Your Preferred Editor" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
+Write-Host "Which editor are you using? (This helps in installing extensions later)" -ForegroundColor Cyan
+Write-Host "1. VS Code"
+Write-Host "2. VS Codium"
+Write-Host "3. Cursor"
+Write-Host "4. Trae"
+Write-Host "5. Windsurf"
+Write-Host "6. Google Antigravity"
+
+$choice = Read-Host "Select your editor (1-6)"
+
+
+$editorCommand = switch ($choice) {
+    "1" { "code" }
+    "2" { "codium" }
+    "3" { "cursor" }
+    "4" { "trae" }
+    "5" { "windsurf" }
+    "6" { "antigravity" } 
+    Default { "code" }   
+}
+
+Write-Host "Target editor set to: $editorCommand" -ForegroundColor Green
+
+
 # Step 7: Update launch.json dynamic paths
 Write-Host "--------------------------------------"
 Write-Host "Step 7: Update launch.json dynamic paths" -ForegroundColor Magenta
