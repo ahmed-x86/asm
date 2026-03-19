@@ -238,9 +238,9 @@ else
 fi
 
 echo "------------------------------------------"
-echo "Step 6: Select Your Preferred Editor"
+echo "Step 6: Select Your Editor & Install Extensions"
 echo "------------------------------------------"
-echo "Which editor are you using? (This helps in installing extensions later)"
+echo "Which editor are you using? (To install Syntax & Error-checking extensions)"
 echo "1) VS Code"
 echo "2) VS Codium"
 echo "3) Cursor"
@@ -261,6 +261,23 @@ case $editor_choice in
 esac
 
 echo -e "Target editor set to: \033[1;32m$EDITOR_CMD\033[0m"
+
+
+read -p "Do you want to install Assembly extensions (Colors & Error-checking)? (y/n): " install_ext
+
+if [[ "$install_ext" =~ ^[Yy]$ ]]; then
+    if command -v $EDITOR_CMD &> /dev/null; then
+        echo "Installing extensions for $EDITOR_CMD..."
+        
+        $EDITOR_CMD --install-extension 13xforever.language-x86-64-assembly --force
+        $EDITOR_CMD --install-extension doinkythederp.nasm-language-support --force
+        $EDITOR_CMD --install-extension usernamehw.errorlens --force
+        echo -e "\033[1;32mExtensions ready! Highlighting and Error-markers active. ✅\033[0m"
+    else
+        echo -e "\033[1;31mWarning:\033[0m '$EDITOR_CMD' not found in PATH. Skipping extensions."
+    fi
+fi
+
 
 
 echo "------------------------------------------"
