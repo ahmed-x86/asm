@@ -326,6 +326,8 @@ fi
 
 sudo chmod +x "$TARGET_PATH"
 
+cat /usr/bin/asm-run
+
 echo -e "\033[1;36mNow you can type the 'asm-run' command from the terminal even without a code editor, followed by the file name ending in .asm\033[0m"
 
 
