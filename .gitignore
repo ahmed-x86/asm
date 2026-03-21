@@ -42,3 +42,4 @@ python-3.11.8-amd64.exe
 build/
 dist/
 Debug/
+build.spec
