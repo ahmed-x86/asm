@@ -4,7 +4,7 @@
 set -e
 
 
-trap 'echo -e "\n\033[1;31mScript interrupted! Cleaning up...\033[0m"; rm -rf uasm_temp uasm_linux.zip irvine.zip; exit 1' SIGINT
+trap 'echo -e "\n\033[1;31mScript interrupted! Cleaning up...\033[0m"; rm -rf uasm_temp uasm_linux.zip irvine.zip irvine_temp.zip; exit 1' SIGINT
 
 SUDO_CMD=""
 if [ "$(id -u)" -ne 0 ]; then
@@ -112,6 +112,25 @@ install_uasm_manual() {
     else
         echo "Downloading and installing uasm binary for Linux..."
         curl -fsSL "https://www.terraspace.co.uk/uasm257_linux64.zip" -o uasm_linux.zip
+        
+        
+        echo "Verifying uasm file integrity..."
+        if command -v sha256sum &> /dev/null; then
+            EXPECTED_UASM_HASH="d9fecb2226f66c7e48d81402fc13a67eda23507be9067a2983ee14ec7d68a94f"
+            ACTUAL_UASM_HASH=$(sha256sum uasm_linux.zip | awk '{print $1}')
+            echo "Expected: $EXPECTED_UASM_HASH"
+            echo "Actual:   $ACTUAL_UASM_HASH"
+            
+            if [ "$ACTUAL_UASM_HASH" != "$EXPECTED_UASM_HASH" ]; then
+                echo -e "\033[1;31mError: SHA256 mismatch for uasm! The file is corrupted or compromised.\033[0m"
+                rm -f uasm_linux.zip
+                exit 1
+            fi
+            echo -e "\033[1;32mIntegrity check passed! ✅\033[0m"
+        else
+            echo -e "\033[1;33mWarning: 'sha256sum' command not found, skipping integrity check.\033[0m"
+        fi
+        
         
         echo "Extracting uasm..."
         unzip -q uasm_linux.zip -d uasm_temp
@@ -267,6 +286,25 @@ set -e
 if [[ "$download_irvine" =~ ^[Yy]$ ]]; then
     echo "Downloading Irvine.zip..."
     curl -fsSL "http://www.asmirvine.com/gettingStartedVS2019/Irvine.zip" -o irvine.zip
+    
+    
+    echo "Verifying Irvine library integrity..."
+    if command -v sha256sum &> /dev/null; then
+        EXPECTED_IRVINE_HASH="3d084c092ddc775dd9969a9d5318f13fc7f74a806a4d710fc00f62df3b4c5a5e"
+        ACTUAL_IRVINE_HASH=$(sha256sum irvine.zip | awk '{print $1}')
+        echo "Expected: $EXPECTED_IRVINE_HASH"
+        echo "Actual:   $ACTUAL_IRVINE_HASH"
+        
+        if [ "$ACTUAL_IRVINE_HASH" != "$EXPECTED_IRVINE_HASH" ]; then
+            echo -e "\033[1;31mError: SHA256 mismatch for Irvine Library! The file is corrupted or compromised.\033[0m"
+            rm -f irvine.zip
+            exit 1
+        fi
+        echo -e "\033[1;32mIntegrity check passed! ✅\033[0m"
+    else
+        echo -e "\033[1;33mWarning: 'sha256sum' command not found, skipping integrity check.\033[0m"
+    fi
+    
     
     echo "Extracting Irvine library..."
     unzip -q irvine.zip -d irvine
