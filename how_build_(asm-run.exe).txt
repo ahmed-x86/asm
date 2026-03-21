@@ -1,0 +1,25 @@
+# 1. Download Windows 64-bit Python installer
+wget https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe
+
+# 2. Silently install Python inside Wine
+wine python-3.8.10-amd64.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+
+# 3. Upgrade pip for the Wine environment
+wine python -m pip install --upgrade pip
+
+# 4. Install PyInstaller for bundling
+wine python -m pip install pyinstaller
+
+# 5. Build the standalone executable
+wine pyinstaller --onefile asm-run.py
+
+# 6. Navigate to the output folder
+cd dist
+
+# 7. Move the executable to the main project directory
+cp asm-run.exe ..
+
+# 8. Return to the main project folder
+cd ..
+
+# Your 'asm-run.exe' is now ready to use!
