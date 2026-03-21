@@ -29,7 +29,7 @@
 
 ### An all-in-one repository designed to kickstart your Assembly (ASM) development. This environment provides out-of-the-box support for Linux x64 and Windows (x86/x64), featuring pre-configured VS Code settings for a seamless workflow.
 
----
+-----
 
 ## 🛠️ Quick Installation
 
@@ -37,7 +37,7 @@ Choose your weapon (Operating System) and run the corresponding command to confi
 
 ## 🐧 Linux (One-Line Installer)
 
-Supports Arch, Debian/Ubuntu, Fedora, Alpine, openSUSE and void.
+Supports Arch, Debian/Ubuntu, Fedora, Alpine, openSUSE, Solus, Gentoo, Puppy Linux, and Void.
 
 ```bash
 bash <(curl -sSL https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-linux.sh)
@@ -59,7 +59,7 @@ Dedicated script for Windows 7 compatibility.
 irm https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows7.ps1 | iex
 ```
 
----
+-----
 
 ## 🏗️ Manual Setup (Local)
 
@@ -86,43 +86,43 @@ cd asm
 .\install-windows7.ps1
 ```
 
-
-
----
+-----
 
 ## ✨ Key Features
 
-* **Dual-Platform Support:** Native installers for both Windows and Linux, ensuring your dev environment is consistent everywhere.
-* **VS Code Integration:** Pre-configured `tasks.json` and `launch.json` allow you to build and debug your code with a single shortcut (`Ctrl+Shift+B`).
-* **Smart Dependency Management:**
-* **On Linux:** Automatically detects your package manager (`pacman`, `apt`, `dnf`) and installs `NASM`, `GCC`, and `GDB`.
-* **On Windows:** Sets up NASM and required build tools automatically.
+  * **Dual-Platform Support:** Native installers for both Windows and Linux, ensuring your dev environment is consistent everywhere.
+  * **VS Code Integration:** Pre-configured `tasks.json` and `launch.json` allow you to build and debug your code with a single shortcut (`Ctrl+Shift+B`).
+  * **Global CLI Tool:** Installs the custom `asm-run` command globally, allowing you to compile and test `.asm` files directly from any terminal without opening an editor.
+  * **Smart Dependency Management:**
+      * **On Linux:** Automatically detects your package manager (`pacman`, `apt`, `dnf`, `xbps`, `emerge`, `zypper`, `apk`, `pkg`), checks for existing packages to skip unnecessary downloads, and installs required tools (`NASM`, `GCC`, `Wine`, `UASM`).
+      * **On Windows:** Sets up NASM and required build tools automatically.
+  * **Legacy Support:** Special installer for **Windows 7** to ensure assembly development isn't limited by OS version.
+  * **Cross-Compilation:** Ready-to-use toolchains to compile and test Windows binaries directly from Linux using Wine and MinGW.
 
-
-* **Legacy Support:** Special installer for **Windows 7** to ensure assembly development isn't limited by OS version.
-* **Cross-Compilation:** Ready-to-use toolchains to compile and test Windows binaries directly from Linux using Wine and MinGW.
-* **Supported Editors: The installer will automatically set up Extensions (Syntax Highlighting & Error Lens) for: VS Code, VSCodium, Cursor, Trae, Windsurf, and Google Antigravity.
 ## 🧠 Smart Engine Features
-* **Editor Agnostic:** Automatically detects your IDE (**VS Code, VSCodium, Cursor, Trae, Windsurf, or Google Antigravity**).
-* **Universal Package Tracking:** Detects if your editor is installed via **Native Package Manager, Snap, or Flatpak** and configures it accordingly.
-* **Auto-Path Patching:** Dynamically updates `launch.json` and `tasks.json` based on your current OS username and directory path. No manual editing required!
-* **Alpine Compatibility:** Includes a dedicated pre-step to fix `sed` compatibility on Alpine Linux.
 
----
+  * **Bulletproof Execution:** Features built-in network stability checks, strict input validation loops (idiot-proof inputs), and a `Ctrl+C` trap that automatically cleans up partial downloads if interrupted.
+  * **Security First:** Implements rigorous **SHA256 Integrity Checks** for external binaries (uasm, Irvine library) to guarantee file authenticity and prevent corrupted extractions.
+  * **Editor Agnostic:** Automatically scans and detects your installed IDE (**VS Code, VSCodium, Cursor, Trae, Windsurf, or Google Antigravity**) and sets up Assembly extensions (Syntax Highlighting & Error Lens).
+  * **Universal Package Tracking:** Detects if your editor is installed via **Native Package Manager, Snap, or Flatpak** and configures extensions using the correct isolated commands.
+  * **Auto-Path Patching:** Dynamically updates `launch.json` and `tasks.json` based on your current OS username and directory path. No manual editing required\!
+  * **Alpine Compatibility:** Includes a dedicated pre-step to fix `sed` compatibility on Alpine Linux.
+
+-----
 
 ## 🎭 Final Note
-*  [!IMPORTANT]
-*  This project was built to prove that "Understanding Linux" isn't about talking, it's about building solutions that work on **9+ distributions** with a single click. 
- 
-- `echo -e "\033[1;35m فيه حمار قال اني مابفهمش لينكس.. عايز اقولك شوف السكربت ده يا حمار بشري\033[0m"`
- 
- **Stay Hard, Keep Coding. 🚀**
 
+> [\!IMPORTANT]
+> This project was built to prove that "Understanding Linux" isn't about talking, it's about building solutions that work on **9+ distributions** with a single click.
+
+  - `echo -e "\033[1;35m فيه حمار قال اني مابفهمش لينكس.. عايز اقولك شوف السكربت ده يا حمار بشري\033[0m"`
+
+**Stay Hard, Keep Coding. 🚀**
 
 > **Note for Arch Users:** Because "I use Arch btw" shouldn't mean spending three hours on config. We've got you covered. 😎
 
----
+-----
 
 # i use arch btw
 
----
+-----
