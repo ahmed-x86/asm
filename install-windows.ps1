@@ -239,6 +239,47 @@ if ($downloadExamples.Trim().ToLower() -eq "y") {
     }
 }
 
+# Step 12: Setup asm-run command
+Write-Host "--------------------------------------"
+Write-Host "Step 12: Setup asm-run command" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
+
+$msysBinDir = "C:\msys64\usr\bin"
+$targetPath = Join-Path $msysBinDir "asm-run.exe"
+$url = "https://github.com/ahmed-x86/asm/raw/refs/heads/main/asm-run.exe"
+
+Write-Host "Setting up 'asm-run' for Windows CLI..." -ForegroundColor Cyan
+
+# التحقق من وجود المجلد أولاً
+if (-not (Test-Path $msysBinDir)) {
+    Write-Host "Warning: MSYS2 bin directory not found at $msysBinDir. Creating it..." -ForegroundColor Yellow
+    New-Item -ItemType Directory -Path $msysBinDir -Force | Out-Null
+}
+
+if (Test-Path "asm-run.exe") {
+    Write-Host "Found local asm-run.exe. Copying to $targetPath..." -ForegroundColor Gray
+    try {
+        Copy-Item -Path "asm-run.exe" -Destination $targetPath -Force -ErrorAction Stop
+        Write-Host "Copied successfully! ✅" -ForegroundColor Green
+    } catch {
+        Write-Host "Error: Could not copy file. Try running PowerShell as Administrator. ❌" -ForegroundColor Red
+    }
+} else {
+    Write-Host "Local asm-run.exe not found. Downloading from GitHub..." -ForegroundColor Gray
+    try {
+        Invoke-WebRequest -Uri $url -OutFile $targetPath -UseBasicParsing -ErrorAction Stop
+        Write-Host "Downloaded successfully to $targetPath! ✅" -ForegroundColor Green
+    } catch {
+        Write-Host "Error: Failed to download asm-run.exe. Check your internet connection. ❌" -ForegroundColor Red
+    }
+}
+
+if (Test-Path $targetPath) {
+    Write-Host "Verification: asm-run.exe is now globally accessible. ✨" -ForegroundColor Green
+    Write-Host "Now you can type the 'asm-run' command from any terminal followed by your .asm file." -ForegroundColor Cyan
+}
+
+
 Write-Host "--------------------------------------"
 Write-Host "🎉 ALL DONE! Your Ultimate Assembly Environment is 100% Ready! 🚀" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
