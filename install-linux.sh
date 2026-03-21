@@ -310,8 +310,23 @@ else
 fi
 
 echo "------------------------------------------"
-echo "Step 7: download asm-run command"
+echo "Step 7: Setup asm-run command"
 echo "------------------------------------------"
+
+TARGET_PATH="/usr/bin/asm-run"
+
+if [ -f "asm-run.sh" ]; then
+    echo "Found local asm-run.sh. Copying to $TARGET_PATH..."
+    sudo cp asm-run.sh "$TARGET_PATH"
+else
+    echo "Local asm-run.sh not found. Downloading from GitHub..."
+    sudo curl -fsSL "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/asm-run.sh" -o "$TARGET_PATH"
+fi
+
+
+sudo chmod +x "$TARGET_PATH"
+
+echo -e "\033[1;36mNow you can type the 'asm-run' command from the terminal even without a code editor, followed by the file name ending in .asm\033[0m"
 
 
 echo "------------------------------------------"
