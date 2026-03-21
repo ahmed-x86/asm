@@ -558,10 +558,7 @@ echo -e "${C_SEP}------------------------------------------${C_RST}"
 echo -e "${C_STEP} i use archlinux BTW${C_RST}"
 echo -e "${C_SEP}------------------------------------------${C_RST}"
 
-echo -e "${C_SEP}------------------------------------------${C_RST}"
-# Ultimate Error Roast Message (Bold White text on Red background)
-echo -e "\033[1;37;41m فيه حمار قال اني مابفهمش لينكس عايز اقولك شوف ده يا حمار بشري \033[0m"
-echo -e "${C_SEP}------------------------------------------${C_RST}"
+
 
 echo -e "${C_SEP}------------------------------------------${C_RST}"
 echo -e "${C_SUC}Setup finished successfully!${C_RST}"
