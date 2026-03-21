@@ -47,7 +47,7 @@ fi
 
 
 echo "------------------------------------------"
-echo "Step 1: Detecting Linux Distribution & Installing Packages..."
+echo "Step 1: Detecting Linux Distribution & Checking Packages..."
 echo "------------------------------------------"
 
 if [ -f /etc/os-release ]; then
@@ -57,6 +57,50 @@ if [ -f /etc/os-release ]; then
 else
     OS_ID="unknown"
 fi
+
+
+check_packages_installed() {
+    local missing=0
+    
+    local cmds=("nasm" "wine" "ghex" "unzip" "curl" "uasm")
+    
+    for cmd in "${cmds[@]}"; do
+        if ! command -v "$cmd" &> /dev/null; then
+            missing=1
+            break
+        fi
+    done
+    
+    
+    if ! command -v x86_64-w64-mingw32-gcc &> /dev/null && ! command -v i686-w64-mingw32-gcc &> /dev/null; then
+        missing=1
+    fi
+
+    if [ "$missing" -eq 0 ]; then
+        echo -e "\033[1;32mAll required packages are already installed! ✅ Skipping installation step.\033[0m"
+        return 1 
+    else
+        echo -e "\033[1;33mSome required packages are missing.\033[0m"
+        while true; do
+            set +e
+            read -p "Do you want to install the missing packages? (y/n): " install_choice
+            set -e
+            
+            case "$install_choice" in
+                [Yy]* ) 
+                    return 0 
+                    ;;
+                [Nn]* ) 
+                    echo -e "\033[1;33mSkipping installation as requested. (Warning: Some features might not work! ⚠️)\033[0m"
+                    return 1 
+                    ;;
+                * ) 
+                    echo -e "\033[1;31mInvalid input. Please enter 'y' to install or 'n' to skip.\033[0m"
+                    ;;
+            esac
+        done
+    fi
+}
 
 install_uasm_manual() {
     if command -v uasm &> /dev/null; then
@@ -132,48 +176,51 @@ install_packages() {
     esac
 }
 
-if [[ "$OS_ID" =~ (arch|manjaro|endeavouros|cachyos) ]] || [[ "$OS_LIKE" == *"arch"* ]]; then
-    install_packages arch
-elif [[ "$OS_ID" =~ (debian|ubuntu|mint|zorin|peppermint|kali|parrot) ]] || [[ "$OS_LIKE" == *"debian"* ]]; then
-    install_packages debian
-elif [[ "$OS_ID" =~ (fedora|nobara|bazzit|rhel|centos) ]] || [[ "$OS_LIKE" == *"fedora"* ]]; then
-    install_packages fedora
-elif [[ "$OS_ID" == "void" ]]; then
-    install_packages void
-elif [[ "$OS_ID" == "gentoo" ]]; then
-    install_packages gentoo
-elif [[ "$OS_ID" == "solus" ]]; then
-    install_packages solus
-elif [[ "$OS_ID" =~ (suse|opensuse) ]]; then
-    install_packages suse
-elif [[ "$OS_ID" == "alpine" ]]; then
-    install_packages alpine
-elif [[ "$OS_ID" == "puppy" ]] || [[ "$OS_NAME" == *"Puppy"* ]]; then
-    install_packages puppy
-else
-    echo "Could not auto-detect distribution ($OS_ID)."
-    echo "1) Arch  2) Debian  3) Fedora  4) Void  5) Gentoo  6) Solus  7) openSUSE  8) Alpine"
-    
-    while true; do
-        set +e
-        read -p "Select your base (1-8): " choice
-        set -e
+
+if check_packages_installed; then
+    if [[ "$OS_ID" =~ (arch|manjaro|endeavouros|cachyos) ]] || [[ "$OS_LIKE" == *"arch"* ]]; then
+        install_packages arch
+    elif [[ "$OS_ID" =~ (debian|ubuntu|mint|zorin|peppermint|kali|parrot) ]] || [[ "$OS_LIKE" == *"debian"* ]]; then
+        install_packages debian
+    elif [[ "$OS_ID" =~ (fedora|nobara|bazzit|rhel|centos) ]] || [[ "$OS_LIKE" == *"fedora"* ]]; then
+        install_packages fedora
+    elif [[ "$OS_ID" == "void" ]]; then
+        install_packages void
+    elif [[ "$OS_ID" == "gentoo" ]]; then
+        install_packages gentoo
+    elif [[ "$OS_ID" == "solus" ]]; then
+        install_packages solus
+    elif [[ "$OS_ID" =~ (suse|opensuse) ]]; then
+        install_packages suse
+    elif [[ "$OS_ID" == "alpine" ]]; then
+        install_packages alpine
+    elif [[ "$OS_ID" == "puppy" ]] || [[ "$OS_NAME" == *"Puppy"* ]]; then
+        install_packages puppy
+    else
+        echo "Could not auto-detect distribution ($OS_ID)."
+        echo "1) Arch  2) Debian  3) Fedora  4) Void  5) Gentoo  6) Solus  7) openSUSE  8) Alpine"
         
-        case $choice in
-            1) install_packages arch; break ;;
-            2) install_packages debian; break ;;
-            3) install_packages fedora; break ;;
-            4) install_packages void; break ;;
-            5) install_packages gentoo; break ;;
-            6) install_packages solus; break ;;
-            7) install_packages suse; break ;;
-            8) install_packages alpine; break ;;
-            *) 
-                echo -e "\033[1;31mError: '$choice' is invalid. This does not correspond to any supported distribution.\033[0m"
-                echo -e "\033[1;33mPlease enter a valid number between 1 and 8.\033[0m"
-                ;;
-        esac
-    done
+        while true; do
+            set +e
+            read -p "Select your base (1-8): " choice
+            set -e
+            
+            case $choice in
+                1) install_packages arch; break ;;
+                2) install_packages debian; break ;;
+                3) install_packages fedora; break ;;
+                4) install_packages void; break ;;
+                5) install_packages gentoo; break ;;
+                6) install_packages solus; break ;;
+                7) install_packages suse; break ;;
+                8) install_packages alpine; break ;;
+                *) 
+                    echo -e "\033[1;31mError: '$choice' is invalid. This does not correspond to any supported distribution.\033[0m"
+                    echo -e "\033[1;33mPlease enter a valid number between 1 and 8.\033[0m"
+                    ;;
+            esac
+        done
+    fi
 fi
 
 
