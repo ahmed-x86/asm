@@ -545,6 +545,7 @@ echo -en "${C_RST}"
 echo -e "${C_SUC}Verifying installed command content:${C_RST}"
 echo -en "${C_CMD}"
 cat "$TARGET_PATH"
+echo ""
 echo -en "${C_RST}"
 
 echo -e "${C_CMD}Now you can type the 'asm-run' command from the terminal even without a code editor, followed by the file name ending in .asm${C_RST}"
