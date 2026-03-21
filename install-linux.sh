@@ -153,17 +153,27 @@ elif [[ "$OS_ID" == "puppy" ]] || [[ "$OS_NAME" == *"Puppy"* ]]; then
 else
     echo "Could not auto-detect distribution ($OS_ID)."
     echo "1) Arch  2) Debian  3) Fedora  4) Void  5) Gentoo  6) Solus  7) openSUSE  8) Alpine"
-    read -p "Select your base (1-8): " choice
-    case $choice in
-        1) install_packages arch ;;
-        2) install_packages debian ;;
-        3) install_packages fedora ;;
-        4) install_packages void ;;
-        5) install_packages gentoo ;;
-        6) install_packages solus ;;
-        7) install_packages suse ;;
-        8) install_packages alpine ;;
-    esac
+    
+    while true; do
+        set +e
+        read -p "Select your base (1-8): " choice
+        set -e
+        
+        case $choice in
+            1) install_packages arch; break ;;
+            2) install_packages debian; break ;;
+            3) install_packages fedora; break ;;
+            4) install_packages void; break ;;
+            5) install_packages gentoo; break ;;
+            6) install_packages solus; break ;;
+            7) install_packages suse; break ;;
+            8) install_packages alpine; break ;;
+            *) 
+                echo -e "\033[1;31mError: '$choice' is invalid. This does not correspond to any supported distribution.\033[0m"
+                echo -e "\033[1;33mPlease enter a valid number between 1 and 8.\033[0m"
+                ;;
+        esac
+    done
 fi
 
 
