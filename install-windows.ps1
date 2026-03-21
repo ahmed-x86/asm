@@ -1,3 +1,35 @@
+# --- Configuration & Variables Section ---
+$msysDir = "C:\msys64"
+$pacmanExe = Join-Path $msysDir "usr\bin\pacman.exe"
+$currentDir = Get-Location
+$destination = Join-Path $currentDir "msys2.exe"
+$pathDoneFile = Join-Path $currentDir "add-to-path.txt"
+$vscodeDir = Join-Path $currentDir ".vscode"
+$jsonFiles = @("c_cpp_properties.json", "launch.json", "settings.json", "tasks.json")
+$githubBaseUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows/"
+$irvineUrl = "http://www.asmirvine.com/gettingStartedVS2019/Irvine.zip"
+$frhedDestFolder = "C:\Frhed-1.7.1-exe"
+$githubFrhedUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/main/Frhed_Folder/Frhed-1.7.1-exe/"
+$filesToDownload = @("Frhed.exe", "heksedit.dll", "RAWIO32.dll", "Docs/ChangeLog.txt", "Docs/Contributors.txt", "Docs/Frhed.chm", "Docs/GPL.txt", "Languages/de.po", "Languages/fr.po", "Languages/heksedit.lng", "Languages/nl.po")
+$exePath = "C:\Frhed-1.7.1-exe\Frhed.exe"
+$exampleUrls = @(
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_start.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_main.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_start.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_main.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_start.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_main.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_start.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_main.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_start.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_main.asm"
+)
+$msysBinDir = "C:\msys64\usr\bin"
+$targetPath = Join-Path $msysBinDir "asm-run.exe"
+$urlAsmRun = "https://github.com/ahmed-x86/asm/raw/refs/heads/main/asm-run.exe"
+
+# --- Script Logic Starts Here ---
+
 # Set Execution Policy to bypass for the current process to ensure the script runs without errors
 Set-ExecutionPolicy Bypass -Scope Process -Force
 
@@ -7,12 +39,7 @@ Write-Host "--------------------------------------"
 Write-Host "Step 1: Download and Install MSYS2" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
 
-# Initial path configurations
-$msysDir = "C:\msys64"
-$pacmanExe = Join-Path $msysDir "usr\bin\pacman.exe"
-$currentDir = Get-Location
-$destination = Join-Path $currentDir "msys2.exe"
-$pathDoneFile = Join-Path $currentDir "add-to-path.txt"
+
 
 Write-Host "Checking for existing MSYS2 installation..." -ForegroundColor Cyan
 
@@ -74,10 +101,7 @@ Write-Host "--------------------------------------"
 Write-Host "Step 4: VS Code Environment Configuration" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
 Write-Host "Setting up VS Code environment..." -ForegroundColor Cyan
-$vscodeDir = Join-Path $currentDir ".vscode"
 if (-not (Test-Path $vscodeDir)) { New-Item -ItemType Directory -Path $vscodeDir | Out-Null }
-$jsonFiles = @("c_cpp_properties.json", "launch.json", "settings.json", "tasks.json")
-$githubBaseUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/install-windows/"
 
 foreach ($file in $jsonFiles) {
     Write-Host "Downloading $file..." -ForegroundColor Cyan
@@ -90,7 +114,6 @@ Write-Host "Step 5: Download and Extract Irvine32 Library" -ForegroundColor Mage
 Write-Host "--------------------------------------"
 $irvineAnswer = Read-Host "Do you want to download the Irvine Library? It is approximately 24 MB in size. (y/n): "
 if ($irvineAnswer.Trim().ToLower() -eq "y") {
-    $irvineUrl = "http://www.asmirvine.com/gettingStartedVS2019/Irvine.zip"
     Invoke-WebRequest -Uri $irvineUrl -OutFile (Join-Path $currentDir "Irvine.zip")
     Expand-Archive -Path (Join-Path $currentDir "Irvine.zip") -DestinationPath $currentDir -Force
     Remove-Item -Path (Join-Path $currentDir "Irvine.zip") -Force
@@ -184,12 +207,8 @@ Write-Host "Step 9: Download Frhed Hex Editor (Directly from GitHub)" -Foregroun
 Write-Host "--------------------------------------"
 $frhedAnswer = Read-Host "Do you want to download and setup Frhed Hex Editor? (y/n)"
 if ($frhedAnswer.Trim().ToLower() -eq "y") {
-    $frhedDestFolder = "C:\Frhed-1.7.1-exe"
     $dirsToCreate = @($frhedDestFolder, "$frhedDestFolder\Docs", "$frhedDestFolder\Languages")
     foreach ($dir in $dirsToCreate) { if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null } }
-
-    $githubFrhedUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/main/Frhed_Folder/Frhed-1.7.1-exe/"
-    $filesToDownload = @("Frhed.exe", "heksedit.dll", "RAWIO32.dll", "Docs/ChangeLog.txt", "Docs/Contributors.txt", "Docs/Frhed.chm", "Docs/GPL.txt", "Languages/de.po", "Languages/fr.po", "Languages/heksedit.lng", "Languages/nl.po")
 
     foreach ($file in $filesToDownload) {
         Write-Host " -> Fetching $file..." -ForegroundColor Gray
@@ -202,7 +221,6 @@ if ($frhedAnswer.Trim().ToLower() -eq "y") {
 Write-Host "--------------------------------------"
 Write-Host "tep 10: Configure PowerShell Alias for Frhed" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
-$exePath = "C:\Frhed-1.7.1-exe\Frhed.exe"
 if (Test-Path $exePath) {
     $profilePath = $PROFILE
     if (-not (Test-Path (Split-Path $profilePath))) { New-Item -Type Directory -Path (Split-Path $profilePath) -Force | Out-Null }
@@ -220,18 +238,7 @@ Write-Host "Step 11: Download ASM Examples using Native curl.exe" -ForegroundCol
 Write-Host "--------------------------------------"
 $downloadExamples = Read-Host "Do you want to download example Assembly files? (y/n)"
 if ($downloadExamples.Trim().ToLower() -eq "y") {
-    $exampleUrls = @(
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_start.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_main.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_start.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_main.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_start.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_main.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_start.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_main.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_start.asm",
-        "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_main.asm"
-    )
+    
     foreach ($url in $exampleUrls) {
         $fileName = $url.Split('/')[-1]
         Write-Host " -> Fetching $fileName via curl..." -ForegroundColor Gray
@@ -244,9 +251,7 @@ Write-Host "--------------------------------------"
 Write-Host "Step 12: Setup asm-run command" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
 
-$msysBinDir = "C:\msys64\usr\bin"
-$targetPath = Join-Path $msysBinDir "asm-run.exe"
-$url = "https://github.com/ahmed-x86/asm/raw/refs/heads/main/asm-run.exe"
+
 
 Write-Host "Setting up 'asm-run' for Windows CLI..." -ForegroundColor Cyan
 
@@ -267,7 +272,7 @@ if (Test-Path "asm-run.exe") {
 } else {
     Write-Host "Local asm-run.exe not found. Downloading from GitHub..." -ForegroundColor Gray
     try {
-        Invoke-WebRequest -Uri $url -OutFile $targetPath -UseBasicParsing -ErrorAction Stop
+        Invoke-WebRequest -Uri $urlAsmRun -OutFile $targetPath -UseBasicParsing -ErrorAction Stop
         Write-Host "Downloaded successfully to $targetPath! ✅" -ForegroundColor Green
     } catch {
         Write-Host "Error: Failed to download asm-run.exe. Check your internet connection. ❌" -ForegroundColor Red
