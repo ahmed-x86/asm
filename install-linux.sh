@@ -13,6 +13,40 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 echo "------------------------------------------"
+echo "Step 0: Checking Internet Connectivity..."
+echo "------------------------------------------"
+
+
+if ! ping -c 1 -W 3 8.8.8.8 &> /dev/null; then
+    echo -e "\033[1;31mError: No internet connection detected.\033[0m"
+    echo -e "\033[1;33mTo ensure no errors occur because there is no internet currently, please run the script again when internet is available.\033[0m"
+    exit 1
+fi
+
+
+echo "Testing connection speed/stability..."
+AVG_PING=$(ping -c 3 8.8.8.8 2>/dev/null | tail -1 | awk '{print $4}' | cut -d '/' -f 2 | cut -d '.' -f 1)
+
+
+if [[ "$AVG_PING" =~ ^[0-9]+$ ]] && [ "$AVG_PING" -gt 200 ]; then
+    echo -e "\033[1;33mIt seems the internet speed is slow (High Latency: ${AVG_PING}ms). Errors may occur during downloads.\033[0m"
+    
+    set +e # Turn off exit-on-error temporarily for the prompt
+    read -p "Do you want to continue? (y/n): " continue_script
+    set -e
+    
+    if [[ ! "$continue_script" =~ ^[Yy]$ ]]; then
+        echo -e "\033[1;36mNo worries! Better luck next time. Catch you later when the connection is more stable! 🚀\033[0m"
+        exit 0
+    else
+        echo -e "\033[1;32mAlright, let's proceed with caution!\033[0m"
+    fi
+else
+    echo -e "\033[1;32mInternet connection looks good! ✅\033[0m"
+fi
+
+
+echo "------------------------------------------"
 echo "Step 1: Detecting Linux Distribution & Installing Packages..."
 echo "------------------------------------------"
 
