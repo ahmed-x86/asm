@@ -7,7 +7,17 @@
             "command": "C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I\"${workspaceFolder}\\irvine\" -Fo\"${fileDirname}\\${fileBasenameNoExtension}.obj\" \"${file}\" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe \"${fileDirname}\\${fileBasenameNoExtension}.obj\" \"${workspaceFolder}\\irvine\\Irvine32.lib\" -o \"${fileDirname}\\${fileBasenameNoExtension}.exe\" -nostdlib -lkernel32 -luser32 -w '-Wl,--subsystem,console' ; & \"${fileDirname}\\${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "presentation": { "reveal": "always", "panel": "shared", "focus": true, "clear": true },
-            "problemMatcher": []
+            "problemMatcher": {
+                "owner": "uasm",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*)\\((\\d+)\\)\\s+:\\s+(error|warning|fatal)\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            }
         },
         {
             "label": "2. Win32 Standalone (Standard)",
@@ -15,7 +25,17 @@
             "command": "C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 \"${file}\" -o \"${fileDirname}\\${fileBasenameNoExtension}.obj\" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe \"${fileDirname}\\${fileBasenameNoExtension}.obj\" -o \"${fileDirname}\\${fileBasenameNoExtension}.exe\" -nostartfiles -lkernel32 -luser32 ; & \"${fileDirname}\\${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "presentation": { "reveal": "always", "panel": "shared", "focus": true, "clear": true },
-            "problemMatcher": []
+            "problemMatcher": {
+                "owner": "nasm",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):\\s+(error|warning|fatal):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            }
         },
         {
             "label": "3. Win64 Standalone (Standard)",
@@ -23,7 +43,17 @@
             "command": "C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 \"${file}\" -o \"${fileDirname}\\${fileBasenameNoExtension}.obj\" ; C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe \"${fileDirname}\\${fileBasenameNoExtension}.obj\" -o \"${fileDirname}\\${fileBasenameNoExtension}.exe\" -nostartfiles -lkernel32 -luser32 ; & \"${fileDirname}\\${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "presentation": { "reveal": "always", "panel": "shared", "focus": true, "clear": true },
-            "problemMatcher": []
+            "problemMatcher": {
+                "owner": "nasm",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):\\s+(error|warning|fatal):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            }
         },
         {
             "label": "4. Win32 Irvine (Custom main)",
@@ -31,7 +61,17 @@
             "command": "C:\\msys64\\mingw64\\bin\\uasm.exe -q -coff -I\"${workspaceFolder}\\irvine\" -Fo\"${fileDirname}\\${fileBasenameNoExtension}.obj\" \"${file}\" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe \"${fileDirname}\\${fileBasenameNoExtension}.obj\" \"${workspaceFolder}\\irvine\\Irvine32.lib\" -o \"${fileDirname}\\${fileBasenameNoExtension}.exe\" -nostdlib -lkernel32 -luser32 -w '-Wl,-e_main' '-Wl,--subsystem,console' '-Wl,--enable-stdcall-fixup' 2>$null ; & \"${fileDirname}\\${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "presentation": { "reveal": "always", "panel": "shared", "focus": true, "clear": true },
-            "problemMatcher": []
+            "problemMatcher": {
+                "owner": "uasm",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*)\\((\\d+)\\)\\s+:\\s+(error|warning|fatal)\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            }
         },
         {
             "label": "5. Win32 Standalone (Custom main)",
@@ -39,7 +79,17 @@
             "command": "C:\\msys64\\mingw64\\bin\\nasm.exe -f win32 \"${file}\" -o \"${fileDirname}\\${fileBasenameNoExtension}.obj\" ; C:\\msys64\\mingw32\\bin\\i686-w64-mingw32-gcc.exe \"${fileDirname}\\${fileBasenameNoExtension}.obj\" -o \"${fileDirname}\\${fileBasenameNoExtension}.exe\" -nostartfiles -lkernel32 -luser32 '-Wl,-e_main' ; & \"${fileDirname}\\${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "presentation": { "reveal": "always", "panel": "shared", "focus": true, "clear": true },
-            "problemMatcher": []
+            "problemMatcher": {
+                "owner": "nasm",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):\\s+(error|warning|fatal):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            }
         },
         {
             "label": "6. Win64 Standalone (Custom main)",
@@ -47,7 +97,17 @@
             "command": "C:\\msys64\\mingw64\\bin\\nasm.exe -f win64 \"${file}\" -o \"${fileDirname}\\${fileBasenameNoExtension}.obj\" ; C:\\msys64\\mingw64\\bin\\x86_64-w64-mingw32-gcc.exe \"${fileDirname}\\${fileBasenameNoExtension}.obj\" -o \"${fileDirname}\\${fileBasenameNoExtension}.exe\" -nostartfiles -lkernel32 -luser32 '-Wl,-emain' ; & \"${fileDirname}\\${fileBasenameNoExtension}.exe\"",
             "group": { "kind": "build", "isDefault": true },
             "presentation": { "reveal": "always", "panel": "shared", "focus": true, "clear": true },
-            "problemMatcher": []
+            "problemMatcher": {
+                "owner": "nasm",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):\\s+(error|warning|fatal):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            }
         }
     ]
 }
