@@ -101,7 +101,7 @@ if ($irvineAnswer.Trim().ToLower() -eq "y") {
 Write-Host "--------------------------------------"
 Write-Host "Step 6: Select Your Preferred Editor" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
-Write-Host "Which editor are you using? (This helps in installing extensions later)" -ForegroundColor Cyan
+Write-Host "Which editor are you using?" -ForegroundColor Cyan
 Write-Host "1. VS Code"
 Write-Host "2. VS Codium"
 Write-Host "3. Cursor"
@@ -111,19 +111,49 @@ Write-Host "6. Google Antigravity"
 
 $choice = Read-Host "Select your editor (1-6)"
 
-
-$editorCommand = switch ($choice) {
-    "1" { "code" }
-    "2" { "codium" }
-    "3" { "cursor" }
-    "4" { "trae" }
-    "5" { "windsurf" }
-    "6" { "antigravity" } 
-    Default { "code" }   
+# تعريف البيانات لكل محرر (الاسم، اسم الملف، والمسارات المتوقعة)
+$editorInfo = switch ($choice) {
+    "1" { @{ name = "VS Code"; bin = "code.cmd"; paths = @("$env:LocalAppData\Programs\Microsoft VS Code\bin\code.cmd", "C:\Program Files\Microsoft VS Code\bin\code.cmd", "C:\Program Files (x86)\Microsoft VS Code\bin\code.cmd") } }
+    "2" { @{ name = "VS Codium"; bin = "codium.cmd"; paths = @("$env:LocalAppData\Programs\VSCodium\bin\codium.cmd", "C:\Program Files\VSCodium\bin\codium.cmd", "C:\Program Files (x86)\VSCodium\bin\codium.cmd") } }
+    "3" { @{ name = "Cursor"; bin = "cursor.cmd"; paths = @("$env:LocalAppData\Programs\Cursor\bin\cursor.cmd", "C:\Program Files\Cursor\bin\cursor.cmd", "C:\Program Files (x86)\Cursor\bin\cursor.cmd") } }
+    "4" { @{ name = "Trae"; bin = "trae.cmd"; paths = @("$env:LocalAppData\Programs\Trae\bin\trae.cmd", "C:\Program Files\Trae\bin\trae.cmd") } }
+    "5" { @{ name = "Windsurf"; bin = "windsurf.cmd"; paths = @("$env:LocalAppData\Programs\Windsurf\bin\windsurf.cmd", "C:\Program Files\Windsurf\bin\windsurf.cmd") } }
+    "6" { @{ name = "Google Antigravity"; bin = "antigravity.exe"; paths = @("C:\Program Files\Google\Antigravity\antigravity.exe", "$env:LocalAppData\Programs\Google\Antigravity\antigravity.exe") } }
+    Default { @{ name = "VS Code"; bin = "code.cmd"; paths = @("$env:LocalAppData\Programs\Microsoft VS Code\bin\code.cmd") } }
 }
 
-Write-Host "Target editor set to: $editorCommand" -ForegroundColor Green
+$foundPath = $null
 
+
+foreach ($path in $editorInfo.paths) {
+    if (Test-Path $path) {
+        $foundPath = $path
+        break
+    }
+}
+
+if ($null -ne $foundPath) {
+    Write-Host "Auto-detected $($editorInfo.name) at: $foundPath ✅" -ForegroundColor Green
+    $editorCommand = "`"$foundPath`""
+} else {
+    Write-Host "Could not find $($editorInfo.name) in default locations. ⚠️" -ForegroundColor Yellow
+    Write-Host "Hint: The path should look like this -> `"C:\Program Files\$($editorInfo.name)\bin\$($editorInfo.bin)`"" -ForegroundColor Gray
+    
+    $manualPath = Read-Host "Please enter the full path to your editor's binary (cmd or exe) manually"
+    
+    
+    $manualPath = $manualPath.Trim('"')
+
+    if (Test-Path $manualPath) {
+        $editorCommand = "`"$manualPath`""
+        Write-Host "Manual path verified! ✅" -ForegroundColor Green
+    } else {
+        Write-Host "Warning: Path still not found! Defaulting to the command name. (Extensions might fail to install) ❌" -ForegroundColor Red
+        $editorCommand = $editorInfo.bin
+    }
+}
+
+Write-Host "Final target editor command: $editorCommand" -ForegroundColor Green
 
 # Step 7: Update launch.json dynamic paths
 Write-Host "--------------------------------------"
