@@ -267,48 +267,89 @@ fi
 echo "------------------------------------------"
 echo "Step 6: Smart Editor Detection & Extension Setup"
 echo "------------------------------------------"
-echo "Which editor are you using?"
-echo "1) VS Code"
-echo "2) VS Codium"
-echo "3) Cursor"
-echo "4) Trae"
-echo "5) Windsurf"
-echo "6) Google Antigravity"
 
-set +e
-read -p "Select your editor (1-6): " editor_choice
-set -e
+echo "Scanning system for installed code editors..."
 
+EDITORS=(
+    "VS Code:code:visual-studio-code-bin:code:com.visualstudio.code"
+    "VS Codium:codium:vscodium-bin:codium:com.vscodium.codium"
+    "Cursor:cursor:cursor-bin:cursor:"
+    "Trae:trae:trae-bin:trae:"
+    "Windsurf:windsurf:windsurf-bin:windsurf:"
+)
 
-case $editor_choice in
-    1) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ; FLATPAK_ID="com.visualstudio.code" ;;
-    2) EDITOR_CMD="codium" ; PKG_NAME="vscodium-bin" ; DEB_RPM="codium" ; FLATPAK_ID="com.vscodium.codium" ;;
-    3) EDITOR_CMD="cursor" ; PKG_NAME="cursor-bin" ; DEB_RPM="cursor" ; FLATPAK_ID="" ;;
-    4) EDITOR_CMD="trae" ; PKG_NAME="trae-bin" ; DEB_RPM="trae" ; FLATPAK_ID="" ;;
-    5) EDITOR_CMD="windsurf" ; PKG_NAME="windsurf-bin" ; DEB_RPM="windsurf" ; FLATPAK_ID="" ;;
-    6) EDITOR_CMD="antigravity" ; PKG_NAME="google-antigravity-bin" ; DEB_RPM="antigravity" ; FLATPAK_ID="" ;;
-    *) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ; FLATPAK_ID="com.visualstudio.code" ;;
-esac
-
+DETECTED_EDITOR=""
 FOUND=false
 
 
-if command -v $EDITOR_CMD &> /dev/null; then
-    echo -e "\033[1;32mFound $EDITOR_CMD installed via Package Manager! ✅\033[0m"
-    FOUND=true
-elif command -v snap &> /dev/null && snap list 2>/dev/null | grep -q "^$EDITOR_CMD"; then
-    echo -e "\033[1;32mFound $EDITOR_CMD installed via Snap! ✅\033[0m"
-    EDITOR_CMD="snap run $EDITOR_CMD"
-    FOUND=true
-elif [[ -n "$FLATPAK_ID" ]] && command -v flatpak &> /dev/null && flatpak list 2>/dev/null | grep -q "$FLATPAK_ID"; then
-    echo -e "\033[1;32mFound $EDITOR_CMD installed via Flatpak! ✅\033[0m"
-    EDITOR_CMD="flatpak run $FLATPAK_ID"
-    FOUND=true
+for editor_data in "${EDITORS[@]}"; do
+    IFS=':' read -r e_name e_cmd e_pkg e_deb e_flatpak <<< "$editor_data"
+    
+    if command -v "$e_cmd" &> /dev/null; then
+        echo -e "\033[1;32mAuto-detected $e_name installed via Package Manager! ✅\033[0m"
+        EDITOR_CMD="$e_cmd"
+        DETECTED_EDITOR="$e_name"
+        FOUND=true
+        break
+    elif command -v snap &> /dev/null && snap list 2>/dev/null | grep -q "^$e_cmd"; then
+        echo -e "\033[1;32mAuto-detected $e_name installed via Snap! ✅\033[0m"
+        EDITOR_CMD="snap run $e_cmd"
+        DETECTED_EDITOR="$e_name"
+        FOUND=true
+        break
+    elif [[ -n "$e_flatpak" ]] && command -v flatpak &> /dev/null && flatpak list 2>/dev/null | grep -q "$e_flatpak"; then
+        echo -e "\033[1;32mAuto-detected $e_name installed via Flatpak! ✅\033[0m"
+        EDITOR_CMD="flatpak run $e_flatpak"
+        DETECTED_EDITOR="$e_name"
+        FOUND=true
+        break
+    fi
+done
+
+
+if [ "$FOUND" = false ]; then
+    echo -e "\033[1;33mCould not automatically detect an installed editor.\033[0m"
+    echo "Which editor are you using?"
+    echo "1) VS Code"
+    echo "2) VS Codium"
+    echo "3) Cursor"
+    echo "4) Trae"
+    echo "5) Windsurf"
+    echo "6) Google Antigravity"
+
+    set +e
+    read -p "Select your editor (1-6): " editor_choice
+    set -e
+
+    case $editor_choice in
+        1) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ; FLATPAK_ID="com.visualstudio.code" ;;
+        2) EDITOR_CMD="codium" ; PKG_NAME="vscodium-bin" ; DEB_RPM="codium" ; FLATPAK_ID="com.vscodium.codium" ;;
+        3) EDITOR_CMD="cursor" ; PKG_NAME="cursor-bin" ; DEB_RPM="cursor" ; FLATPAK_ID="" ;;
+        4) EDITOR_CMD="trae" ; PKG_NAME="trae-bin" ; DEB_RPM="trae" ; FLATPAK_ID="" ;;
+        5) EDITOR_CMD="windsurf" ; PKG_NAME="windsurf-bin" ; DEB_RPM="windsurf" ; FLATPAK_ID="" ;;
+        6) EDITOR_CMD="antigravity" ; PKG_NAME="google-antigravity-bin" ; DEB_RPM="antigravity" ; FLATPAK_ID="" ;;
+        *) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ; FLATPAK_ID="com.visualstudio.code" ;;
+    esac
+
+    
+    if command -v $EDITOR_CMD &> /dev/null; then
+        echo -e "\033[1;32mFound $EDITOR_CMD installed via Package Manager! ✅\033[0m"
+        FOUND=true
+    elif command -v snap &> /dev/null && snap list 2>/dev/null | grep -q "^$EDITOR_CMD"; then
+        echo -e "\033[1;32mFound $EDITOR_CMD installed via Snap! ✅\033[0m"
+        EDITOR_CMD="snap run $EDITOR_CMD"
+        FOUND=true
+    elif [[ -n "$FLATPAK_ID" ]] && command -v flatpak &> /dev/null && flatpak list 2>/dev/null | grep -q "$FLATPAK_ID"; then
+        echo -e "\033[1;32mFound $EDITOR_CMD installed via Flatpak! ✅\033[0m"
+        EDITOR_CMD="flatpak run $FLATPAK_ID"
+        FOUND=true
+    fi
 fi
+
 
 if [ "$FOUND" = true ]; then
     set +e
-    read -p "Do you want to install Assembly extensions for $EDITOR_CMD? (y/n): " install_ext
+    read -p "Do you want to install Assembly extensions for your editor? (y/n): " install_ext
     set -e
     if [[ "$install_ext" =~ ^[Yy]$ ]]; then
         echo "Installing extensions..."
@@ -318,10 +359,10 @@ if [ "$FOUND" = true ]; then
         echo -e "\033[1;32mExtensions setup complete! ✨\033[0m"
     fi
 else
-    echo -e "\033[1;31m$EDITOR_CMD is NOT found on your system.\033[0m"
+    echo -e "\033[1;31mThe selected editor is NOT found on your system.\033[0m"
     
     if [[ -z "$FLATPAK_ID" && "$editor_choice" -ne 1 && "$editor_choice" -ne 2 ]]; then
-         echo -e "\033[1;33mNote: $EDITOR_CMD is not available on Flathub, check AUR or official site.\033[0m"
+         echo -e "\033[1;33mNote: This editor is not available on Flathub, check AUR or official site.\033[0m"
     fi
 
     set +e
@@ -331,7 +372,7 @@ else
         case $OS_ID in
             arch|manjaro|endeavouros|cachyos) echo -e "Run: \033[1;33myay -S $PKG_NAME\033[0m" ;;
             debian|ubuntu|mint|zorin) echo -e "Run: \033[1;33m$SUDO_CMD apt install $DEB_RPM\033[0m (or download .deb/AppImage)" ;;
-            *) echo "Please visit the official website to install $EDITOR_CMD." ;;
+            *) echo "Please visit the official website to install the editor." ;;
         esac
     fi
 fi
