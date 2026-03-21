@@ -1,6 +1,10 @@
 #!/bin/bash
 
+
 set -e
+
+
+trap 'echo -e "\n\033[1;31mScript interrupted! Cleaning up...\033[0m"; rm -rf uasm_temp uasm_linux.zip irvine.zip; exit 1' SIGINT
 
 SUDO_CMD=""
 if [ "$(id -u)" -ne 0 ]; then
@@ -70,7 +74,7 @@ check_packages_installed() {
             break
         fi
     done
-    
+
     
     if ! command -v x86_64-w64-mingw32-gcc &> /dev/null && ! command -v i686-w64-mingw32-gcc &> /dev/null; then
         missing=1
@@ -338,7 +342,6 @@ EDITORS=(
 DETECTED_EDITOR=""
 FOUND=false
 
-
 for editor_data in "${EDITORS[@]}"; do
     IFS=':' read -r e_name e_cmd e_pkg e_deb e_flatpak <<< "$editor_data"
     
@@ -374,21 +377,22 @@ if [ "$FOUND" = false ]; then
     echo "5) Windsurf"
     echo "6) Google Antigravity"
 
-    set +e
-    read -p "Select your editor (1-6): " editor_choice
-    set -e
+    while true; do
+        set +e
+        read -p "Select your editor (1-6): " editor_choice
+        set -e
 
-    case $editor_choice in
-        1) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ; FLATPAK_ID="com.visualstudio.code" ;;
-        2) EDITOR_CMD="codium" ; PKG_NAME="vscodium-bin" ; DEB_RPM="codium" ; FLATPAK_ID="com.vscodium.codium" ;;
-        3) EDITOR_CMD="cursor" ; PKG_NAME="cursor-bin" ; DEB_RPM="cursor" ; FLATPAK_ID="" ;;
-        4) EDITOR_CMD="trae" ; PKG_NAME="trae-bin" ; DEB_RPM="trae" ; FLATPAK_ID="" ;;
-        5) EDITOR_CMD="windsurf" ; PKG_NAME="windsurf-bin" ; DEB_RPM="windsurf" ; FLATPAK_ID="" ;;
-        6) EDITOR_CMD="antigravity" ; PKG_NAME="google-antigravity-bin" ; DEB_RPM="antigravity" ; FLATPAK_ID="" ;;
-        *) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ; FLATPAK_ID="com.visualstudio.code" ;;
-    esac
+        case $editor_choice in
+            1) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ; FLATPAK_ID="com.visualstudio.code"; break ;;
+            2) EDITOR_CMD="codium" ; PKG_NAME="vscodium-bin" ; DEB_RPM="codium" ; FLATPAK_ID="com.vscodium.codium"; break ;;
+            3) EDITOR_CMD="cursor" ; PKG_NAME="cursor-bin" ; DEB_RPM="cursor" ; FLATPAK_ID=""; break ;;
+            4) EDITOR_CMD="trae" ; PKG_NAME="trae-bin" ; DEB_RPM="trae" ; FLATPAK_ID=""; break ;;
+            5) EDITOR_CMD="windsurf" ; PKG_NAME="windsurf-bin" ; DEB_RPM="windsurf" ; FLATPAK_ID=""; break ;;
+            6) EDITOR_CMD="antigravity" ; PKG_NAME="google-antigravity-bin" ; DEB_RPM="antigravity" ; FLATPAK_ID=""; break ;;
+            *) echo -e "\033[1;31mError: Invalid choice. Please select a number between 1 and 6.\033[0m" ;;
+        esac
+    done
 
-    
     if command -v $EDITOR_CMD &> /dev/null; then
         echo -e "\033[1;32mFound $EDITOR_CMD installed via Package Manager! ✅\033[0m"
         FOUND=true
