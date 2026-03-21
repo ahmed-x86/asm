@@ -250,36 +250,55 @@ echo "6) Google Antigravity"
 
 read -p "Select your editor (1-6): " editor_choice
 
+# Define settings based on user choice
 case $editor_choice in
-    1) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ;;
-    2) EDITOR_CMD="codium" ; PKG_NAME="vscodium-bin" ; DEB_RPM="codium" ;;
-    3) EDITOR_CMD="cursor" ; PKG_NAME="cursor-bin" ; DEB_RPM="cursor" ;;
-    4) EDITOR_CMD="trae" ; PKG_NAME="trae-bin" ; DEB_RPM="trae" ;;
-    5) EDITOR_CMD="windsurf" ; PKG_NAME="windsurf-bin" ; DEB_RPM="windsurf" ;;
-    6) EDITOR_CMD="antigravity" ; PKG_NAME="google-antigravity-bin" ; DEB_RPM="antigravity" ;;
-    *) EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" ;;
+    1) 
+        EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" 
+        FLATPAK_ID="com.visualstudio.code" 
+        ;;
+    2) 
+        EDITOR_CMD="codium" ; PKG_NAME="vscodium-bin" ; DEB_RPM="codium" 
+        FLATPAK_ID="com.vscodium.codium" 
+        ;;
+    3) 
+        EDITOR_CMD="cursor" ; PKG_NAME="cursor-bin" ; DEB_RPM="cursor" 
+        FLATPAK_ID="" # Not available on Flathub (Usually AppImage/AUR)
+        ;;
+    4) 
+        EDITOR_CMD="trae" ; PKG_NAME="trae-bin" ; DEB_RPM="trae" 
+        FLATPAK_ID="" # Not available on Flathub
+        ;;
+    5) 
+        EDITOR_CMD="windsurf" ; PKG_NAME="windsurf-bin" ; DEB_RPM="windsurf" 
+        FLATPAK_ID="" # Not available on Flathub
+        ;;
+    6) 
+        EDITOR_CMD="antigravity" ; PKG_NAME="google-antigravity-bin" ; DEB_RPM="antigravity" 
+        FLATPAK_ID="" # Google Antigravity does not have a Flatpak package
+        ;;
+    *) 
+        EDITOR_CMD="code" ; PKG_NAME="visual-studio-code-bin" ; DEB_RPM="code" 
+        FLATPAK_ID="com.visualstudio.code" 
+        ;;
 esac
-
-
-FLATPAK_ID="com.visualstudio.code" 
 
 FOUND=false
 
-
+# 1. Check Native Package Manager (Binary in PATH)
 if command -v $EDITOR_CMD &> /dev/null; then
     echo -e "\033[1;32mFound $EDITOR_CMD installed via Package Manager! ✅\033[0m"
     FOUND=true
 
+# 2. Check Snap
 elif command -v snap &> /dev/null && snap list | grep -q "^$EDITOR_CMD"; then
     echo -e "\033[1;32mFound $EDITOR_CMD installed via Snap! ✅\033[0m"
     EDITOR_CMD="snap run $EDITOR_CMD"
     FOUND=true
 
-elif command -v flatpak &> /dev/null && flatpak list | grep -q "$EDITOR_CMD"; then
+
+elif [[ -n "$FLATPAK_ID" ]] && command -v flatpak &> /dev/null && flatpak list | grep -q "$FLATPAK_ID"; then
     echo -e "\033[1;32mFound $EDITOR_CMD installed via Flatpak! ✅\033[0m"
-    
-    ACTUAL_ID=$(flatpak list --columns=application | grep "$EDITOR_CMD" | head -n 1)
-    EDITOR_CMD="flatpak run $ACTUAL_ID"
+    EDITOR_CMD="flatpak run $FLATPAK_ID"
     FOUND=true
 fi
 
@@ -294,17 +313,21 @@ if [ "$FOUND" = true ]; then
     fi
 else
     echo -e "\033[1;31m$EDITOR_CMD is NOT found on your system.\033[0m"
+    
+    
+    if [[ -z "$FLATPAK_ID" && "$editor_choice" -ne 1 && "$editor_choice" -ne 2 ]]; then
+         echo -e "\033[1;33mNote: $EDITOR_CMD is not available on Flathub, check AUR or official site.\033[0m"
+    fi
+
     read -p "Would you like me to suggest the installation command for $OS_ID? (y/n): " suggest_install
     if [[ "$suggest_install" =~ ^[Yy]$ ]]; then
         case $OS_ID in
             arch|manjaro|endeavouros|cachyos)
                 echo -e "Run: \033[1;33myay -S $PKG_NAME\033[0m" ;;
             debian|ubuntu|mint|zorin)
-                echo -e "Run: \033[1;33msudo apt install $DEB_RPM\033[0m (or download .deb from official site)" ;;
-            fedora)
-                echo -e "Run: \033[1;33msudo dnf install $DEB_RPM\033[0m" ;;
+                echo -e "Run: \033[1;33msudo apt install $DEB_RPM\033[0m (or download .deb/AppImage)" ;;
             *)
-                echo "Please visit the official website to install $EDITOR_CMD on $OS_ID." ;;
+                echo "Please visit the official website to install $EDITOR_CMD." ;;
         esac
     fi
 fi
