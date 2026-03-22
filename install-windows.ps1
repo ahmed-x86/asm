@@ -30,12 +30,31 @@ $urlAsmRun = "https://github.com/ahmed-x86/asm/raw/refs/heads/main/asm-run.exe"
 
 # --- Script Logic Starts Here ---
 
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# Step 0: Fix Execution Policy Red Error (Interactive)
+Write-Host "--------------------------------------" -ForegroundColor Yellow
+Write-Host "Step 0: PowerShell Execution Policy Setup" -ForegroundColor Magenta
+Write-Host "--------------------------------------"
+Write-Host "To prevent security errors and allow custom commands like 'ghex',"
+Write-Host "we need to set the Execution Policy to 'RemoteSigned'." -ForegroundColor Cyan
+
+$policyConfirm = Read-Host "Do you want to enable running local scripts? (y/n)"
+if ($policyConfirm.Trim().ToLower() -eq "y") {
+    try {
+        Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+        Write-Host "Success: Execution Policy updated! ✅" -ForegroundColor Green
+    } catch {
+        Write-Host "Warning: Could not update policy. You might need to run as Admin. ⚠️" -ForegroundColor Red
+    }
+} else {
+    Write-Host "Skipped. Note: Custom aliases might not work without this. ⚠️" -ForegroundColor Yellow
+}
+
 # Set Execution Policy to bypass for the current process to ensure the script runs without errors
 Set-ExecutionPolicy Bypass -Scope Process -Force
 
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-
-Write-Host "--------------------------------------"
+Write-Host "`n--------------------------------------"
 Write-Host "Step 1: Download and Install MSYS2" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
 
@@ -43,11 +62,10 @@ Write-Host "--------------------------------------"
 
 Write-Host "Checking for existing MSYS2 installation..." -ForegroundColor Cyan
 
-# Step 0: Check if MSYS2 is already installed
+# Step 1 Check if MSYS2 is already installed
 if (Test-Path $pacmanExe) {
     Write-Host "MSYS2 is already installed in $msysDir. Skipping download and installation!" -ForegroundColor Green
 } else {
-    # Step 1: Download and Install MSYS2
     Write-Host "Fetching the latest MSYS2 download link from GitHub..." -ForegroundColor Cyan
     $releaseData = Invoke-RestMethod -Uri "https://api.github.com/repos/msys2/msys2-installer/releases/latest"
     $url = $releaseData.assets | Where-Object { $_.name -match "^msys2-x86_64-\d+\.exe$" } | Select-Object -ExpandProperty browser_download_url
@@ -163,7 +181,7 @@ if ($null -ne $foundPath) {
     Write-Host "Hint: The path should look like this -> `"C:\Program Files\$($editorInfo.name)\bin\$($editorInfo.bin)`"" -ForegroundColor Gray
     
     $manualPath = Read-Host "Please enter the full path to your editor's binary (cmd or exe) manually"
-    
+
     
     $manualPath = $manualPath.Trim('"')
 
@@ -219,7 +237,7 @@ if ($frhedAnswer.Trim().ToLower() -eq "y") {
 
 # Step 10: Configure PowerShell Alias for Frhed
 Write-Host "--------------------------------------"
-Write-Host "tep 10: Configure PowerShell Alias for Frhed" -ForegroundColor Magenta
+Write-Host "Step 10: Configure PowerShell Alias for Frhed" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
 if (Test-Path $exePath) {
     $profilePath = $PROFILE
