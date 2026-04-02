@@ -365,13 +365,15 @@ if [[ "$download_irvine" =~ ^[Yy]$ ]]; then
     echo -e "${C_WRN}Warning: 'sha256sum' command not found, skipping integrity check.${C_RST}"
   fi
 
-  echo -e "${C_TXT}Extracting Irvine library...${C_RST}"
+echo -e "${C_TXT}Extracting Irvine library to /opt/irvine...${C_RST}"
   echo -en "${C_CMD}"
-  unzip -q irvine.zip -d irvine
+  $SUDO_CMD mkdir -p /opt/irvine
+  $SUDO_CMD unzip -q -o irvine.zip -d /opt/irvine
+  $SUDO_CMD chmod -R 755 /opt/irvine
   echo -e "Cleaning up..."
   rm irvine.zip
   echo -en "${C_RST}"
-  echo -e "${C_SUC}Irvine library installed successfully in the 'irvine' directory.${C_RST}"
+  echo -e "${C_SUC}Irvine library installed successfully in /opt/irvine!${C_RST}"
 else
   echo -e "${C_TXT}Skipping Irvine library download.${C_RST}"
 fi
