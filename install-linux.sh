@@ -554,9 +554,9 @@ if [ "$FOUND" = true ]; then
   if [[ "$install_ext" =~ ^[Yy]$ ]]; then
     echo -e "${C_TXT}Installing extensions...${C_RST}"
     echo -en "${C_CMD}"
-    $EDITOR_CMD --install-extension 13xforever.language-x86-64-assembly --force
-    $EDITOR_CMD --install-extension doinkythederp.nasm-language-support --force
-    $EDITOR_CMD --install-extension usernamehw.errorlens --force
+    $EDITOR_CMD --install-extension 13xforever.language-x86-64-assembly --force || true
+    $EDITOR_CMD --install-extension doinkythederp.nasm-language-support --force || echo -e "\n${C_WRN}Note: Extension not found in this editor's registry. Skipped.${C_CMD}"
+    $EDITOR_CMD --install-extension usernamehw.errorlens --force || true
     echo -en "${C_RST}"
     echo -e "${C_SUC}Extensions setup complete! ✨${C_RST}"
   fi
@@ -621,4 +621,3 @@ echo -e "${C_SEP}------------------------------------------${C_RST}"
 echo -e "${C_SEP}------------------------------------------${C_RST}"
 echo -e "${C_SUC}Setup finished successfully!${C_RST}"
 echo -e "${C_SEP}------------------------------------------${C_RST}"
-
