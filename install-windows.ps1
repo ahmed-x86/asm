@@ -130,12 +130,15 @@ foreach ($file in $jsonFiles) {
 Write-Host "--------------------------------------"
 Write-Host "Step 5: Download and Extract Irvine32 Library" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
-$irvineAnswer = Read-Host "Do you want to download the Irvine Library? It is approximately 24 MB in size. (y/n): "
+
+$irvineDest = "C:\Irvine" 
+if (-not (Test-Path $irvineDest)) { New-Item -ItemType Directory -Path $irvineDest -Force | Out-Null }
+
+$irvineAnswer = Read-Host "Do you want to download the Irvine Library to $irvineDest? (y/n)"
 if ($irvineAnswer.Trim().ToLower() -eq "y") {
-    Invoke-WebRequest -Uri $irvineUrl -OutFile (Join-Path $currentDir "Irvine.zip")
-    Expand-Archive -Path (Join-Path $currentDir "Irvine.zip") -DestinationPath $currentDir -Force
-    Remove-Item -Path (Join-Path $currentDir "Irvine.zip") -Force
-    Write-Host "Irvine library is ready!" -ForegroundColor Green
+    Invoke-WebRequest -Uri $irvineUrl -OutFile (Join-Path $env:TEMP "Irvine.zip")
+    Expand-Archive -Path (Join-Path $env:TEMP "Irvine.zip") -DestinationPath $irvineDest -Force
+    Write-Host "Irvine library is ready at $irvineDest ✅" -ForegroundColor Green
 }
 
 # Step 6: Identify Target Editor for Extensions
