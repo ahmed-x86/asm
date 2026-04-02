@@ -132,32 +132,57 @@ Write-Host "--------------------------------------"
 
 $irvineDest = "C:\Irvine"
 $localIrvine = Join-Path $currentDir "Irvine"
+$localZipFile = Join-Path $currentDir "Irvine.zip"
 
 
 if (Test-Path $localIrvine) {
     Write-Host "Found local 'Irvine' folder. Copying directly to $irvineDest..." -ForegroundColor Cyan
     
-    
+
     if (-not (Test-Path $irvineDest)) { New-Item -ItemType Directory -Path $irvineDest -Force | Out-Null }
     
     try {
-        
         Copy-Item -Path "$localIrvine\*" -Destination $irvineDest -Recurse -Force -ErrorAction Stop
         Write-Host "Irvine library is copied and ready at $irvineDest ✅" -ForegroundColor Green
     } catch {
         Write-Host "Error: Failed to copy Irvine folder. You might need to run PowerShell as Administrator. ❌" -ForegroundColor Red
     }
 } 
-# 2. إذا لم يكن موجوداً محلياً، نعرض خيار التحميل
+
 else {
-    if (-not (Test-Path $irvineDest)) { New-Item -ItemType Directory -Path $irvineDest -Force | Out-Null }
-    
-    $irvineAnswer = Read-Host "Local 'Irvine' folder not found. Do you want to download the Irvine Library to $irvineDest? (y/n)"
+    $irvineAnswer = Read-Host "Local 'Irvine' folder not found. Do you want to download and extract it now? (y/n)"
     if ($irvineAnswer.Trim().ToLower() -eq "y") {
-        Write-Host "Downloading Irvine Library..." -ForegroundColor Cyan
-        Invoke-WebRequest -Uri $irvineUrl -OutFile (Join-Path $env:TEMP "Irvine.zip")
-        Expand-Archive -Path (Join-Path $env:TEMP "Irvine.zip") -DestinationPath $irvineDest -Force
-        Write-Host "Irvine library downloaded and ready at $irvineDest ✅" -ForegroundColor Green
+        Write-Host "Downloading Irvine Library to current directory..." -ForegroundColor Cyan
+        
+        
+        Invoke-WebRequest -Uri $irvineUrl -OutFile $localZipFile
+        
+        Write-Host "Extracting to local 'Irvine' folder..." -ForegroundColor Cyan
+        
+        Expand-Archive -Path $localZipFile -DestinationPath $localIrvine -Force
+        
+        
+        if (Test-Path $localZipFile) {
+            $deleteZipAnswer = Read-Host "Extraction complete. Do you want to delete the downloaded 'Irvine.zip' file? (y/n)"
+            if ($deleteZipAnswer.Trim().ToLower() -eq "y") {
+                Remove-Item -Path $localZipFile -Force
+                Write-Host "Irvine.zip deleted. 🗑️" -ForegroundColor Gray
+            } else {
+                Write-Host "Irvine.zip kept. 📦" -ForegroundColor Gray
+            }
+        }
+        
+        Write-Host "Copying extracted files to $irvineDest..." -ForegroundColor Cyan
+        if (-not (Test-Path $irvineDest)) { New-Item -ItemType Directory -Path $irvineDest -Force | Out-Null }
+        
+        
+        try {
+            Copy-Item -Path "$localIrvine\*" -Destination $irvineDest -Recurse -Force -ErrorAction Stop
+            Write-Host "Irvine library downloaded locally and copied to $irvineDest ✅" -ForegroundColor Green
+        } catch {
+            Write-Host "Error: Downloaded successfully locally, but failed to copy to C:\Irvine. You might need Admin rights. ⚠️" -ForegroundColor Yellow
+        }
+        
     } else {
         Write-Host "Skipping Irvine setup." -ForegroundColor Yellow
     }
