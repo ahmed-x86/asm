@@ -18,12 +18,13 @@ if not os.path.isfile(file_path):
 # Setup variables
 file_dir = os.path.dirname(os.path.abspath(file_path))
 file_basename = os.path.splitext(os.path.basename(file_path))[0]
-workspace_folder = os.getcwd()
 
 obj_file = os.path.join(file_dir, f"{file_basename}.obj")
 exe_file = os.path.join(file_dir, f"{file_basename}.exe")
-irvine_lib = os.path.join(workspace_folder, "irvine", "Irvine32.lib")
-irvine_inc = os.path.join(workspace_folder, "irvine")
+
+# Global Irvine Paths
+irvine_lib = r"C:\irvine\Irvine32.lib"
+irvine_inc = r"C:\irvine"
 
 # Tools paths
 uasm = r"C:\msys64\mingw64\bin\uasm.exe"
