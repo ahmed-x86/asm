@@ -335,6 +335,9 @@ echo -e "${C_SEP}------------------------------------------${C_RST}"
 echo -e "${C_STEP}Step 3: Downloading Irvine Library...${C_RST}"
 echo -e "${C_SEP}------------------------------------------${C_RST}"
 
+
+IRVINE_HOME_PATH="$HOME/Irvine/irvine"
+
 set +e
 echo -en "${C_WRN}Do you want to download the Irvine Library? It is approximately 24 MB in size. (y/n): ${C_RST}"
 read download_irvine
@@ -365,15 +368,15 @@ if [[ "$download_irvine" =~ ^[Yy]$ ]]; then
     echo -e "${C_WRN}Warning: 'sha256sum' command not found, skipping integrity check.${C_RST}"
   fi
 
-echo -e "${C_TXT}Extracting Irvine library to /opt/irvine...${C_RST}"
+  echo -e "${C_TXT}Extracting Irvine library to $IRVINE_HOME_PATH...${C_RST}"
   echo -en "${C_CMD}"
-  $SUDO_CMD mkdir -p /opt/irvine
-  $SUDO_CMD unzip -q -o irvine.zip -d /opt/irvine
-  $SUDO_CMD chmod -R 755 /opt/irvine
+  mkdir -p "$IRVINE_HOME_PATH"
+  unzip -q -o irvine.zip -d "$HOME/Irvine" 
+  chmod -R 755 "$HOME/Irvine"
   echo -e "Cleaning up..."
   rm irvine.zip
   echo -en "${C_RST}"
-  echo -e "${C_SUC}Irvine library installed successfully in /opt/irvine!${C_RST}"
+  echo -e "${C_SUC}Irvine library installed successfully in $IRVINE_HOME_PATH!${C_RST}"
 else
   echo -e "${C_TXT}Skipping Irvine library download.${C_RST}"
 fi
@@ -581,19 +584,23 @@ echo -e "${C_SEP}------------------------------------------${C_RST}"
 echo -e "${C_STEP}Step 7: Setup asm-run command${C_RST}"
 echo -e "${C_SEP}------------------------------------------${C_RST}"
 
-TARGET_PATH="/usr/bin/asm-run"
+# المسار الجديد في مجلد المستخدم
+TARGET_PATH="$HOME/.local/bin/asm-run"
+mkdir -p "$HOME/.local/bin" 
 
 echo -en "${C_CMD}"
 if [ -f "asm-run.sh" ]; then
   echo -e "Found local asm-run.sh. Copying to $TARGET_PATH..."
-  $SUDO_CMD cp asm-run.sh "$TARGET_PATH"
+  cp asm-run.sh "$TARGET_PATH"
 else
   echo -e "Local asm-run.sh not found. Downloading from GitHub..."
-  $SUDO_CMD curl -fsSL "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/asm-run.sh" -o "$TARGET_PATH"
+  curl -fsSL "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/asm-run.sh" -o "$TARGET_PATH"
 fi
 
-$SUDO_CMD chmod +x "$TARGET_PATH"
+chmod +x "$TARGET_PATH"
 echo -en "${C_RST}"
+
+sed -i "s|IRVINE_PATH=.*|IRVINE_PATH=\"$HOME/Irvine/irvine\"|g" "$TARGET_PATH"
 
 echo -e "${C_SUC}Verifying installed command content:${C_RST}"
 echo -en "${C_CMD}"
