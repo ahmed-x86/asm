@@ -46,3 +46,4 @@ build.spec
 win32_irvine_main.exe
 win32_std_main.err
 win32_std_main.exe
+win32_std_main.obj
