@@ -304,6 +304,7 @@ if (-not (Test-Path $msysBinDir)) {
     New-Item -ItemType Directory -Path $msysBinDir -Force | Out-Null
 }
 
+# 1. التحقق مما إذا كان الملف موجوداً في نفس مسار السكربت
 if (Test-Path "asm-run.exe") {
     Write-Host "Found local asm-run.exe. Copying to $targetPath..." -ForegroundColor Gray
     try {
@@ -312,18 +313,29 @@ if (Test-Path "asm-run.exe") {
     } catch {
         Write-Host "Error: Could not copy file. Try running PowerShell as Administrator. ❌" -ForegroundColor Red
     }
-} else {
-    Write-Host "Local asm-run.exe not found. Downloading from GitHub..." -ForegroundColor Gray
-    try {
-        Invoke-WebRequest -Uri $urlAsmRun -OutFile $targetPath -UseBasicParsing -ErrorAction Stop
-        Write-Host "Downloaded successfully to $targetPath! ✅" -ForegroundColor Green
-    } catch {
-        Write-Host "Error: Failed to download asm-run.exe. Check your internet connection. ❌" -ForegroundColor Red
+} 
+
+elseif (Test-Path $targetPath) {
+    Write-Host "asm-run.exe is already installed at $targetPath. Skipping download. ✅" -ForegroundColor Green
+} 
+
+else {
+    $downloadAsmRun = Read-Host "Local asm-run.exe not found. Do you want to download it from GitHub? (y/n)"
+    if ($downloadAsmRun.Trim().ToLower() -eq "y") {
+        Write-Host "Downloading from GitHub..." -ForegroundColor Gray
+        try {
+            Invoke-WebRequest -Uri $urlAsmRun -OutFile $targetPath -UseBasicParsing -ErrorAction Stop
+            Write-Host "Downloaded successfully to $targetPath! ✅" -ForegroundColor Green
+        } catch {
+            Write-Host "Error: Failed to download asm-run.exe. Check your internet connection. ❌" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "Skipped downloading asm-run.exe." -ForegroundColor Yellow
     }
 }
 
 if (Test-Path $targetPath) {
-    Write-Host "Verification: asm-run.exe is now globally accessible. ✨" -ForegroundColor Green
+    Write-Host "Verification: asm-run.exe is globally accessible. ✨" -ForegroundColor Green
     Write-Host "Now you can type the 'asm-run' command from any terminal followed by your .asm file." -ForegroundColor Cyan
 }
 
