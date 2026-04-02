@@ -76,7 +76,7 @@
         {
             "label": "5. Build & Run: Win32 Irvine (Standard)",
             "type": "shell",
-            "command": "uasm -q -coff -I./irvine \"${file}\" -Fo\"${fileDirname}/${fileBasenameNoExtension}.o\" && i686-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.o\" ./irvine/Irvine32.lib -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostdlib -lkernel32 -luser32 -w -Wl,--subsystem,console && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
+            "command": "uasm -q -coff -I/home/ahmed/Irvine/irvine \"${file}\" -Fo\"${fileDirname}/${fileBasenameNoExtension}.o\" && i686-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.o\" /home/ahmed/Irvine/irvine/Irvine32.lib -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostdlib -lkernel32 -luser32 -w -Wl,--subsystem,console && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "problemMatcher": {
                 "owner": "uasm",
@@ -130,7 +130,7 @@
         {
             "label": "8. Build & Run: Win32 Irvine (Custom main)",
             "type": "shell",
-            "command": "uasm -q -coff -I./irvine \"${file}\" -Fo\"${fileDirname}/${fileBasenameNoExtension}.o\" && i686-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.o\" ./irvine/Irvine32.lib -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostdlib -lkernel32 -luser32 -w -Wl,-e_main -Wl,--subsystem,console -Wl,--enable-stdcall-fixup && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
+            "command": "uasm -q -coff -I/home/ahmed/Irvine/irvine \"${file}\" -Fo\"${fileDirname}/${fileBasenameNoExtension}.o\" && i686-w64-mingw32-gcc \"${fileDirname}/${fileBasenameNoExtension}.o\" /home/ahmed/Irvine/irvine/Irvine32.lib -o \"${fileDirname}/${fileBasenameNoExtension}.exe\" -nostdlib -lkernel32 -luser32 -w -Wl,-e_main -Wl,--subsystem,console -Wl,--enable-stdcall-fixup && WINEDEBUG=-all wine \"${fileDirname}/${fileBasenameNoExtension}.exe\"",
             "group": "build",
             "problemMatcher": {
                 "owner": "uasm",
