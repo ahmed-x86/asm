@@ -109,8 +109,7 @@ $installPackagesAnswer = Read-Host "Do you want to install required MSYS2 packag
 if ($installPackagesAnswer.Trim().ToLower() -eq "y") {
     Write-Host "Syncing pacman databases and installing packages..." -ForegroundColor Cyan
     & $pacmanExe -Sy --noconfirm
-    & $pacmanExe -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make p7zip
-    & $pacmanExe -S --noconfirm mingw-w64-x86_64-uasm --overwrite "/mingw64/bin/jwasm.exe,/mingw64/share/licenses/uasm/LICENSE"
+    & $pacmanExe -S --noconfirm mingw-w64-i686-gcc mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb mingw-w64-x86_64-nasm make p7zip mingw-w64-x86_64-uasm
     Write-Host "Packages installed successfully!" -ForegroundColor Green
 }
 
@@ -276,7 +275,7 @@ Write-Host "--------------------------------------"
 
 Write-Host "Setting up 'asm-run' for Windows CLI..." -ForegroundColor Cyan
 
-# التحقق من وجود المجلد أولاً
+
 if (-not (Test-Path $msysBinDir)) {
     Write-Host "Warning: MSYS2 bin directory not found at $msysBinDir. Creating it..." -ForegroundColor Yellow
     New-Item -ItemType Directory -Path $msysBinDir -Force | Out-Null
