@@ -23,3 +23,7 @@ cp asm-run.exe ..
 cd ..
 
 # Your 'asm-run.exe' is now ready to use!
+
+# if you have a icon
+
+wine pyinstaller --onefile --icon=icon.ico build.py --name asm-run
