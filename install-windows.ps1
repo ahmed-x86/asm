@@ -125,19 +125,42 @@ foreach ($file in $jsonFiles) {
     Invoke-WebRequest -Uri ($githubBaseUrl + $file) -OutFile (Join-Path $vscodeDir $file)
 }
 
-# Step 5: Download and Extract Irvine32 Library
+# Step 5: Setup Irvine32 Library (Copy Local or Download)
 Write-Host "--------------------------------------"
-Write-Host "Step 5: Download and Extract Irvine32 Library" -ForegroundColor Magenta
+Write-Host "Step 5: Setup Irvine32 Library" -ForegroundColor Magenta
 Write-Host "--------------------------------------"
 
-$irvineDest = "C:\Irvine" 
-if (-not (Test-Path $irvineDest)) { New-Item -ItemType Directory -Path $irvineDest -Force | Out-Null }
+$irvineDest = "C:\Irvine"
+$localIrvine = Join-Path $currentDir "Irvine"
 
-$irvineAnswer = Read-Host "Do you want to download the Irvine Library to $irvineDest? (y/n)"
-if ($irvineAnswer.Trim().ToLower() -eq "y") {
-    Invoke-WebRequest -Uri $irvineUrl -OutFile (Join-Path $env:TEMP "Irvine.zip")
-    Expand-Archive -Path (Join-Path $env:TEMP "Irvine.zip") -DestinationPath $irvineDest -Force
-    Write-Host "Irvine library is ready at $irvineDest ✅" -ForegroundColor Green
+
+if (Test-Path $localIrvine) {
+    Write-Host "Found local 'Irvine' folder. Copying directly to $irvineDest..." -ForegroundColor Cyan
+    
+    
+    if (-not (Test-Path $irvineDest)) { New-Item -ItemType Directory -Path $irvineDest -Force | Out-Null }
+    
+    try {
+        
+        Copy-Item -Path "$localIrvine\*" -Destination $irvineDest -Recurse -Force -ErrorAction Stop
+        Write-Host "Irvine library is copied and ready at $irvineDest ✅" -ForegroundColor Green
+    } catch {
+        Write-Host "Error: Failed to copy Irvine folder. You might need to run PowerShell as Administrator. ❌" -ForegroundColor Red
+    }
+} 
+# 2. إذا لم يكن موجوداً محلياً، نعرض خيار التحميل
+else {
+    if (-not (Test-Path $irvineDest)) { New-Item -ItemType Directory -Path $irvineDest -Force | Out-Null }
+    
+    $irvineAnswer = Read-Host "Local 'Irvine' folder not found. Do you want to download the Irvine Library to $irvineDest? (y/n)"
+    if ($irvineAnswer.Trim().ToLower() -eq "y") {
+        Write-Host "Downloading Irvine Library..." -ForegroundColor Cyan
+        Invoke-WebRequest -Uri $irvineUrl -OutFile (Join-Path $env:TEMP "Irvine.zip")
+        Expand-Archive -Path (Join-Path $env:TEMP "Irvine.zip") -DestinationPath $irvineDest -Force
+        Write-Host "Irvine library downloaded and ready at $irvineDest ✅" -ForegroundColor Green
+    } else {
+        Write-Host "Skipping Irvine setup." -ForegroundColor Yellow
+    }
 }
 
 # Step 6: Identify Target Editor for Extensions
