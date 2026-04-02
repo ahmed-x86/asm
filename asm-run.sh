@@ -43,8 +43,8 @@ case $opt in
         nasm -f elf32 "$file" -o "$base.o" && ld -m elf_i386 -e main "$base.o" -o "$base" && ./"$base"
         ;;
     5)
-        uasm -q -coff -I./irvine "$file" -Fo"$base.o" && \
-        i686-w64-mingw32-gcc "$base.o" ./irvine/Irvine32.lib -o "$base.exe" -nostdlib -lkernel32 -luser32 && \
+        uasm -q -coff -I/opt/irvine "$file" -Fo"$base.o" && \
+        i686-w64-mingw32-gcc "$base.o" /opt/irvine/Irvine32.lib -o "$base.exe" -nostdlib -lkernel32 -luser32 && \
         WINEDEBUG=-all wine "$base.exe"
         ;;
     6)
@@ -58,8 +58,8 @@ case $opt in
         WINEDEBUG=-all wine "$base.exe"
         ;;
     8)
-        uasm -q -coff -I./irvine "$file" -Fo"$base.o" && \
-        i686-w64-mingw32-gcc "$base.o" ./irvine/Irvine32.lib -o "$base.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main && \
+        uasm -q -coff -I/opt/irvine "$file" -Fo"$base.o" && \
+        i686-w64-mingw32-gcc "$base.o" /opt/irvine/Irvine32.lib -o "$base.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main && \
         WINEDEBUG=-all wine "$base.exe"
         ;;
     9)
