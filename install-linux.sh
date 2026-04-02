@@ -584,7 +584,7 @@ echo -e "${C_SEP}------------------------------------------${C_RST}"
 echo -e "${C_STEP}Step 7: Setup asm-run command${C_RST}"
 echo -e "${C_SEP}------------------------------------------${C_RST}"
 
-# المسار الجديد في مجلد المستخدم
+
 TARGET_PATH="$HOME/.local/bin/asm-run"
 mkdir -p "$HOME/.local/bin" 
 
@@ -602,6 +602,17 @@ echo -en "${C_RST}"
 
 sed -i "s|IRVINE_PATH=.*|IRVINE_PATH=\"$HOME/Irvine/irvine\"|g" "$TARGET_PATH"
 
+
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+  echo -e "${C_TXT}Adding ~/.local/bin to your PATH...${C_RST}"
+  echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+  if [ -f "$HOME/.zshrc" ]; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+  fi
+  export PATH="$HOME/.local/bin:$PATH"
+  echo -e "${C_WRN}Note: ~/.local/bin was added to your PATH in .bashrc (and .zshrc if exists).${C_RST}"
+fi
+
 echo -e "${C_SUC}Verifying installed command content:${C_RST}"
 echo -en "${C_CMD}"
 cat "$TARGET_PATH"
@@ -609,6 +620,9 @@ echo ""
 echo -en "${C_RST}"
 
 echo -e "${C_CMD}Now you can type the 'asm-run' command from the terminal even without a code editor, followed by the file name ending in .asm${C_RST}"
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+  echo -e "${C_WRN}(You may need to restart your terminal first, or run 'source ~/.bashrc')${C_RST}"
+fi
 
 echo -e "${C_SEP}------------------------------------------${C_RST}"
 echo -e "${C_MAG}🎉 ALL DONE! Your Ultimate Assembly Environment is 100% Ready! 🚀${C_RST}"
