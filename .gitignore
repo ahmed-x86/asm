@@ -43,3 +43,5 @@ build/
 dist/
 Debug/
 build.spec
+win32_irvine_main.exe
+win32_std_main.err
