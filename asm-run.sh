@@ -45,7 +45,7 @@ case $opt in
         nasm -f elf32 "$file" -o "$base.o" && ld -m elf_i386 -e main "$base.o" -o "$base" && ./"$base"
         ;;
     5)
-        # تم تحديث المسار لـ $IRVINE_PATH
+
         uasm -q -coff -I"$IRVINE_PATH" "$file" -Fo"$base.o" && \
         i686-w64-mingw32-gcc "$base.o" "$IRVINE_PATH/Irvine32.lib" -o "$base.exe" -nostdlib -lkernel32 -luser32 && \
         WINEDEBUG=-all wine "$base.exe"
@@ -61,7 +61,7 @@ case $opt in
         WINEDEBUG=-all wine "$base.exe"
         ;;
     8)
-        # تم تحديث المسار وإضافة Entry Point لـ _main
+        
         uasm -q -coff -I"$IRVINE_PATH" "$file" -Fo"$base.o" && \
         i686-w64-mingw32-gcc "$base.o" "$IRVINE_PATH/Irvine32.lib" -o "$base.exe" -nostdlib -lkernel32 -luser32 -Wl,-e_main && \
         WINEDEBUG=-all wine "$base.exe"
