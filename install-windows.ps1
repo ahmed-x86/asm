@@ -38,7 +38,8 @@ $exampleUrls = @(
     "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux_arm32_start.asm",
     "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux_arm32_main.asm",
     "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/win32_irvine_main.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/freebsd_32_main.asm"
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/freebsd_32_main.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux_risc-v128_main.asm"
 )
 $msysBinDir = "C:\msys64\usr\bin"
 $targetPath = Join-Path $msysBinDir "asm-run.exe"
