@@ -15,7 +15,8 @@ $exePath = "C:\Frhed-1.7.1-exe\Frhed.exe"
 $exampleUrls = @(
     "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_start.asm",
     "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/win32_std_start.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux_64_start.asm"
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux_64_start.asm",
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux_arm64_main.asm"
 )
 $msysBinDir = "C:\msys64\usr\bin"
 $targetPath = Join-Path $msysBinDir "asm-run.exe"
