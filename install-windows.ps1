@@ -13,16 +13,7 @@ $githubFrhedUrl = "https://raw.githubusercontent.com/ahmed-x86/asm/main/Frhed_Fo
 $filesToDownload = @("Frhed.exe", "heksedit.dll", "RAWIO32.dll", "Docs/ChangeLog.txt", "Docs/Contributors.txt", "Docs/Frhed.chm", "Docs/GPL.txt", "Languages/de.po", "Languages/fr.po", "Languages/heksedit.lng", "Languages/nl.po")
 $exePath = "C:\Frhed-1.7.1-exe\Frhed.exe"
 $exampleUrls = @(
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_start.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_main.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_start.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux32_main.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_start.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_std_main.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_start.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win64_std_main.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_start.asm",
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/win32_irvine_main.asm"
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/linux64_start.asm"
 )
 $msysBinDir = "C:\msys64\usr\bin"
 $targetPath = Join-Path $msysBinDir "asm-run.exe"
