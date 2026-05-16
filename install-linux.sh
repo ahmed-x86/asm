@@ -438,6 +438,7 @@ if [[ "$download_examples" =~ ^[Yy]$ ]]; then
     "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux_32_start.asm"
     "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux.asm"
     "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/win32_irvine_start.asm"
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux_arm64_start.asm"
   )
 
   for url in "${example_urls[@]}"; do
