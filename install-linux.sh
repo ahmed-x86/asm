@@ -409,7 +409,7 @@ set -e
 
 if [[ "$download_examples" =~ ^[Yy]$ ]]; then
   example_urls=(
-    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux_64_main.asm"
+    "https://raw.githubusercontent.com/ahmed-x86/asm/refs/heads/main/example/linux_risc-v64_start.asm"
   )
 
   for url in "${example_urls[@]}"; do
