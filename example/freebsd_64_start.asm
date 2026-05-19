@@ -1,6 +1,6 @@
 section .data
-    msg db "Hello from FreeBSD 64-bit on Arch Linux!", 10
-    len equ $ - msg
+    msg1 db "Hello from FreeBSD 64-bit on Arch Linux!", 10
+    len equ $ - msg1
 
 section .text
     global _start
@@ -8,7 +8,7 @@ section .text
 _start:
     mov rax, 4
     mov rdi, 1
-    mov rsi, msg
+    mov rsi, msg1
     mov rdx, len
     syscall
 

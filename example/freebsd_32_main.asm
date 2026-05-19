@@ -1,13 +1,13 @@
 section .data
-    msg db "hi i use arch btw by freebsd32 (main)", 10
-    len equ $ - msg
+    msg1 db "hi i use arch btw by freebsd32 (main)", 10
+    len equ $ - msg1
 
 section .text
     global main
 
 main:
     push dword len
-    push dword msg
+    push dword msg1
     push dword 1
     push dword 0
     mov eax, 4

@@ -1,13 +1,13 @@
 section .data
-    msg db "Hello from FreeBSD 32-bit on Arch Linux!", 10
-    len equ $ - msg
+    msg1 db "Hello from FreeBSD 32-bit on Arch Linux!", 10
+    len equ $ - msg1
 
 section .text
     global _start
 
 _start:
     push dword len
-    push dword msg
+    push dword msg1
     push dword 1
     push dword 0
     mov eax, 4
